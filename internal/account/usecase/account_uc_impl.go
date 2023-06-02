@@ -36,7 +36,6 @@ func (uc *AccountUseCaseImpl) AddActor(req domain.Actor) (int64, error) {
 	}
 
 	data := entity.Actor{
-
 		Username:   req.Username,
 		Password:   hashPassword,
 		RoleID:     1,
@@ -54,6 +53,7 @@ func (uc *AccountUseCaseImpl) AddActor(req domain.Actor) (int64, error) {
 		SuperAdminID: 1,
 		Status:       "pending",
 	}
+
 	result, err := uc.AccountRepository.RegisterAdmin(tx, adminReg)
 	if err != nil {
 		return 0, err
