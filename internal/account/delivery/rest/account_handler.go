@@ -22,6 +22,7 @@ func (h *AccountHandler) Route(app *gin.Engine) {
 	g := app.Group("/account")
 
 	g.POST("", h.AddActor)
+	g.POST("/login", h.Login)
 }
 
 func (h *AccountHandler) AddActor(c *gin.Context) {
@@ -47,6 +48,34 @@ func (h *AccountHandler) AddActor(c *gin.Context) {
 	res := RowsAffected{
 		Message:      "Success",
 		RowsAffected: result,
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *AccountHandler) Login(c *gin.Context) {
+	var req ReqAddActor
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	domain := domain.Actor{
+		Username: req.Username,
+		Password: req.Password,
+	}
+
+	result, err := h.AccountUseCase.VerifyActorCredential(domain)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	res := WebResponse{
+		Message: http.StatusText(http.StatusOK),
+		Data:    ToResponse(result),
 	}
 
 	c.JSON(http.StatusOK, res)

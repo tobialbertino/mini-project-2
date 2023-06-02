@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"database/sql"
+	"errors"
 	"miniProject2/internal/account/model/domain"
 	"miniProject2/internal/account/model/entity"
 	"miniProject2/internal/account/repository"
@@ -19,6 +20,32 @@ func NewAccountUseCase(AccountRepository repository.AccountRepository, DB *sql.D
 		AccountRepository: AccountRepository,
 		DB:                DB,
 	}
+}
+
+// VerifyActorCredential implements AccountUseCase.
+func (uc *AccountUseCaseImpl) VerifyActorCredential(req domain.Actor) (domain.Actor, error) {
+	tx, err := uc.DB.Begin()
+	if err != nil {
+		return domain.Actor{}, err
+	}
+	defer helper.CommitOrRollback(err, tx)
+
+	entity := entity.Actor{
+		Username: req.Username,
+		Password: req.Password,
+	}
+	result, err := uc.AccountRepository.VerifyActorCredential(tx, entity)
+	if err != nil {
+		return domain.Actor{}, err
+	}
+
+	// compare password
+	isValid := security.CheckPasswordHash(req.Password, result.Password)
+	if !isValid {
+		return domain.Actor{}, errors.New("invalid username or password")
+	}
+	res := DTO(result)
+	return res, nil
 }
 
 // AddActor implements AccountUseCase.

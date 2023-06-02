@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"miniProject2/internal/account/model/entity"
 )
@@ -12,8 +13,37 @@ func NewAccountRepository() AccountRepository {
 	return &AccountRepositoryImpl{}
 }
 
+// VerifyActorCredential implements AccountRepository.
+func (*AccountRepositoryImpl) VerifyActorCredential(tx *sql.Tx, actor entity.Actor) (entity.Actor, error) {
+	SQL := `
+	SELECT id, username, password, role_id, is_verified, is_active, created_at, updated_at
+	FROM actors 
+	WHERE username = ?`
+	varArgs := []interface{}{
+		actor.Username,
+	}
+
+	rows, err := tx.Query(SQL, varArgs...)
+	if err != nil {
+		return entity.Actor{}, err
+	}
+	defer rows.Close()
+
+	res := entity.Actor{}
+	if rows.Next() {
+		err := rows.Scan(&res.ID, &res.Username, &res.Password, &res.RoleID, &res.IsVerified, &res.IsActive, &res.CreatedAt, &res.UpdatedAt)
+		if err != nil {
+			return entity.Actor{}, err
+		}
+	} else {
+		return entity.Actor{}, errors.New("incorrect username or password")
+	}
+
+	return res, nil
+}
+
 // RegisterAdmin implements AccountRepository.
-func (*AccountRepositoryImpl) RegisterAdmin(tx *sql.Tx, adminReg entity.AdminReg) (int64, error) {
+func (repo *AccountRepositoryImpl) RegisterAdmin(tx *sql.Tx, adminReg entity.AdminReg) (int64, error) {
 	SQL := `
 	INSERT INTO admin_reg(admin_id, super_admin_id, status) 
 	VALUES (?, 1, ?)`
@@ -36,7 +66,7 @@ func (*AccountRepositoryImpl) RegisterAdmin(tx *sql.Tx, adminReg entity.AdminReg
 }
 
 // AddActor implements AccountRepository.
-func (*AccountRepositoryImpl) AddActor(tx *sql.Tx, actor entity.Actor) (int64, error) {
+func (repo *AccountRepositoryImpl) AddActor(tx *sql.Tx, actor entity.Actor) (int64, error) {
 	SQL := `
 	INSERT INTO actors(username, password, role_id, is_active, is_verified) 
 	VALUES (?, ?, ?, ?, ?)`
@@ -62,7 +92,7 @@ func (*AccountRepositoryImpl) AddActor(tx *sql.Tx, actor entity.Actor) (int64, e
 }
 
 // Login implements AccountRepository.
-func (*AccountRepositoryImpl) Login(tx *sql.Tx, token entity.Token) (string, error) {
+func (repo *AccountRepositoryImpl) Login(tx *sql.Tx, token entity.Token) (string, error) {
 	SQL := `INSERT INTO authentications(token) VALUES (?)`
 	varArgs := []interface{}{
 		token.Token,

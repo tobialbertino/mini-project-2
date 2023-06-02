@@ -15,7 +15,7 @@ func main() {
 	}
 
 	// database
-	DB := app.NewDB()
+	DB := app.NewDB(config)
 
 	// init router
 	r := gin.Default()
