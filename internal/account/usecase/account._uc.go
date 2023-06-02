@@ -6,5 +6,5 @@ type AccountUseCase interface {
 	// auth
 
 	// actor
-	AddActor(req domain.Actor) (string, error)
+	AddActor(req domain.Actor) (int64, error)
 }

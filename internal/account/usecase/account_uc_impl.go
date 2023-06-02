@@ -22,17 +22,17 @@ func NewAccountUseCase(AccountRepository repository.AccountRepository, DB *sql.D
 }
 
 // AddActor implements AccountUseCase.
-func (uc *AccountUseCaseImpl) AddActor(req domain.Actor) (string, error) {
+func (uc *AccountUseCaseImpl) AddActor(req domain.Actor) (int64, error) {
 	tx, err := uc.DB.Begin()
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	defer helper.CommitOrRollback(err, tx)
 
 	// Hash Passwword
 	hashPassword, err := security.HashPassword(req.Password)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	data := entity.Actor{
@@ -44,9 +44,19 @@ func (uc *AccountUseCaseImpl) AddActor(req domain.Actor) (string, error) {
 		IsVerified: false,
 	}
 
-	result, err := uc.AccountRepository.AddActor(tx, data)
+	resultID, err := uc.AccountRepository.AddActor(tx, data)
 	if err != nil {
-		return "", err
+		return 0, err
+	}
+
+	adminReg := entity.AdminReg{
+		AdminId:      resultID,
+		SuperAdminID: 1,
+		Status:       "pending",
+	}
+	result, err := uc.AccountRepository.RegisterAdmin(tx, adminReg)
+	if err != nil {
+		return 0, err
 	}
 
 	return result, nil

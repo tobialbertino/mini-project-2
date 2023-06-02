@@ -44,9 +44,9 @@ func (h *AccountHandler) AddActor(c *gin.Context) {
 		return
 	}
 
-	res := WebResponse{
-		Message: "Success",
-		Data:    result,
+	res := RowsAffected{
+		Message:      "Success",
+		RowsAffected: result,
 	}
 
 	c.JSON(http.StatusOK, res)

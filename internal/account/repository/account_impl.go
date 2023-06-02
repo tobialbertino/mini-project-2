@@ -12,8 +12,31 @@ func NewAccountRepository() AccountRepository {
 	return &AccountRepositoryImpl{}
 }
 
+// RegisterAdmin implements AccountRepository.
+func (*AccountRepositoryImpl) RegisterAdmin(tx *sql.Tx, adminReg entity.AdminReg) (int64, error) {
+	SQL := `
+	INSERT INTO admin_reg(admin_id, super_admin_id, status) 
+	VALUES (?, 1, ?)`
+	varArgs := []interface{}{
+		adminReg.AdminId,
+		adminReg.Status,
+	}
+
+	result, err := tx.Exec(SQL, varArgs...)
+	if err != nil {
+		return 0, err
+	}
+
+	i, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return i, nil
+}
+
 // AddActor implements AccountRepository.
-func (*AccountRepositoryImpl) AddActor(tx *sql.Tx, actor entity.Actor) (string, error) {
+func (*AccountRepositoryImpl) AddActor(tx *sql.Tx, actor entity.Actor) (int64, error) {
 	SQL := `
 	INSERT INTO actors(username, password, role_id, is_active, is_verified) 
 	VALUES (?, ?, ?, ?, ?)`
@@ -27,15 +50,15 @@ func (*AccountRepositoryImpl) AddActor(tx *sql.Tx, actor entity.Actor) (string, 
 
 	result, err := tx.Exec(SQL, varArgs...)
 	if err != nil {
-		return "error repository", err
+		return 0, err
 	}
 
-	i, err := result.RowsAffected()
+	i, err := result.LastInsertId()
 	if err != nil {
-		return "error repository", err
+		return 0, err
 	}
 
-	return fmt.Sprintf("rows affected: %d", i), nil
+	return i, nil
 }
 
 // Login implements AccountRepository.
