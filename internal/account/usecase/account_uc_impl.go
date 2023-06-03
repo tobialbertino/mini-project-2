@@ -61,6 +61,7 @@ func (uc *AccountUseCaseImpl) UpdateAdminStatusByID(reqReg domain.AdminReg, reqA
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		// update admin_reg status only
 		i, err := uc.AccountRepository.UpdateAdminRegStatusByAdminID(tx, etAdminReg)
 		if err != nil {
 			chErr1 <- err
@@ -72,6 +73,7 @@ func (uc *AccountUseCaseImpl) UpdateAdminStatusByID(reqReg domain.AdminReg, reqA
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		// update actor is_verified & is_active
 		_, err = uc.AccountRepository.UpdateAdminStatusByAdminID(tx, etActor)
 		if err != nil {
 			chErr2 <- err
