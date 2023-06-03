@@ -18,6 +18,15 @@ func DTOActor(et entity.Actor) domain.Actor {
 	}
 }
 
+func DTOActorList(et []entity.Actor) []domain.Actor {
+	var result []domain.Actor = make([]domain.Actor, 0)
+	for _, v := range et {
+		result = append(result, DTOActor(v))
+	}
+
+	return result
+}
+
 func DTOAdminReg(et entity.AdminReg) domain.AdminReg {
 	return domain.AdminReg{
 		ID:           et.ID,

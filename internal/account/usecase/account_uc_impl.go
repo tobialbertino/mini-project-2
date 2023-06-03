@@ -23,6 +23,25 @@ func NewAccountUseCase(AccountRepository repository.AccountRepository, DB *sql.D
 	}
 }
 
+// GetAllAdmin implements AccountUseCase.
+func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor) ([]domain.Actor, error) {
+	tx, err := uc.DB.Begin()
+	if err != nil {
+		return []domain.Actor{}, err
+	}
+	defer helper.CommitOrRollback(err, tx)
+
+	et := entity.Actor{
+		Username: req.Username,
+	}
+	result, err := uc.AccountRepository.GetAllAdmin(tx, et)
+	if err != nil {
+		return []domain.Actor{}, err
+	}
+
+	return DTOActorList(result), nil
+}
+
 // DeleteAdminByID implements AccountUseCase.
 func (uc *AccountUseCaseImpl) DeleteAdminByID(req domain.Actor) (int64, error) {
 	tx, err := uc.DB.Begin()

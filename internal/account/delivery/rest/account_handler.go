@@ -25,13 +25,35 @@ func NewAccountHandler(AccountUC usecase.AccountUseCase) *AccountHandler {
 func (h *AccountHandler) Route(app *gin.Engine) {
 	g := app.Group("/account")
 
+	g.GET("", h.GetAllAdmin)
 	g.POST("", h.AddActor)
-	g.POST("/login", h.Login)
+	g.POST("/login", h.Login) // TODO: implement authentications
 
 	// only super_admin
 	g.GET("/admin-reg", h.GetAllAppovalAdmin)
 	g.PUT("/admin-reg", h.UpdateAdminStatus)
-	g.DELETE("admin-reg", h.DeleteAdminByID)
+	g.DELETE("/admin-reg", h.DeleteAdminByID)
+}
+
+func (h *AccountHandler) GetAllAdmin(c *gin.Context) {
+	username := c.Query("username")
+
+	dm := domain.Actor{
+		Username: username,
+	}
+
+	result, err := h.AccountUseCase.GetAllAdmin(dm)
+	if err != nil {
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
+		return
+	}
+
+	res := WebResponse{
+		Message: "Success",
+		Data:    ResponseListActor(result),
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *AccountHandler) DeleteAdminByID(c *gin.Context) {
@@ -111,9 +133,9 @@ func (h *AccountHandler) GetAllAppovalAdmin(c *gin.Context) {
 		return
 	}
 
-	res := RowsAffected{
-		Message:      "Success",
-		RowsAffected: result,
+	res := WebResponse{
+		Message: "Success",
+		Data:    ResponseListAdminReg(result),
 	}
 
 	c.JSON(http.StatusOK, res)

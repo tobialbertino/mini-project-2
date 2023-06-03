@@ -13,8 +13,39 @@ func NewAccountRepository() AccountRepository {
 	return &AccountRepositoryImpl{}
 }
 
+// GetAllAdmin implements AccountRepository.
+func (repo *AccountRepositoryImpl) GetAllAdmin(tx *sql.Tx, actor entity.Actor) ([]entity.Actor, error) {
+	result := make([]entity.Actor, 0)
+
+	SQL := `
+	SELECT id, username, role_id, is_verified, is_active, created_at, updated_at
+	FROM actors
+	WHERE LOWER(username) LIKE ?
+	AND role_id = 1`
+	varArgs := []interface{}{
+		fmt.Sprintf("%%%s%%", actor.Username),
+	}
+
+	rows, err := tx.Query(SQL, varArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var res entity.Actor
+	for rows.Next() {
+		err := rows.Scan(&res.ID, &res.Username, &res.RoleID, &res.IsVerified, &res.IsActive, &res.CreatedAt, &res.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, res)
+	}
+
+	return result, nil
+}
+
 // DeleteAdminByID implements AccountRepository.
-func (*AccountRepositoryImpl) DeleteAdminByID(tx *sql.Tx, actor entity.Actor) (int64, error) {
+func (repo *AccountRepositoryImpl) DeleteAdminByID(tx *sql.Tx, actor entity.Actor) (int64, error) {
 	SQL := `
 	DELETE FROM
 		actors
@@ -38,7 +69,7 @@ func (*AccountRepositoryImpl) DeleteAdminByID(tx *sql.Tx, actor entity.Actor) (i
 }
 
 // UpdateAdminStatusByAdminID implements AccountRepository.
-func (*AccountRepositoryImpl) UpdateAdminStatusByAdminID(tx *sql.Tx, actor entity.Actor) (int64, error) {
+func (repo *AccountRepositoryImpl) UpdateAdminStatusByAdminID(tx *sql.Tx, actor entity.Actor) (int64, error) {
 	SQL := `
 	UPDATE actors 
 	SET is_verified=?, is_active=? 
@@ -63,7 +94,7 @@ func (*AccountRepositoryImpl) UpdateAdminStatusByAdminID(tx *sql.Tx, actor entit
 }
 
 // UpdateAdminRegStatusByAdminID implements AccountRepository.
-func (*AccountRepositoryImpl) UpdateAdminRegStatusByAdminID(tx *sql.Tx, adminReg entity.AdminReg) (int64, error) {
+func (repo *AccountRepositoryImpl) UpdateAdminRegStatusByAdminID(tx *sql.Tx, adminReg entity.AdminReg) (int64, error) {
 	SQL := `
 	UPDATE admin_reg 
 	SET status=?
@@ -87,7 +118,7 @@ func (*AccountRepositoryImpl) UpdateAdminRegStatusByAdminID(tx *sql.Tx, adminReg
 }
 
 // GetAllApprovalAdmin implements AccountRepository.
-func (*AccountRepositoryImpl) GetAllApprovalAdmin(tx *sql.Tx) ([]entity.AdminReg, error) {
+func (repo *AccountRepositoryImpl) GetAllApprovalAdmin(tx *sql.Tx) ([]entity.AdminReg, error) {
 	result := make([]entity.AdminReg, 0)
 
 	SQL := `
@@ -113,7 +144,7 @@ func (*AccountRepositoryImpl) GetAllApprovalAdmin(tx *sql.Tx) ([]entity.AdminReg
 }
 
 // VerifyActorCredential implements AccountRepository.
-func (*AccountRepositoryImpl) VerifyActorCredential(tx *sql.Tx, actor entity.Actor) (entity.Actor, error) {
+func (repo *AccountRepositoryImpl) VerifyActorCredential(tx *sql.Tx, actor entity.Actor) (entity.Actor, error) {
 	SQL := `
 	SELECT id, username, password, role_id, is_verified, is_active, created_at, updated_at
 	FROM actors 

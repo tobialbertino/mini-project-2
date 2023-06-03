@@ -12,6 +12,7 @@ type AccountRepository interface {
 
 	// actor
 	AddActor(tx *sql.Tx, actor entity.Actor) (int64, error)
+	GetAllAdmin(tx *sql.Tx, actor entity.Actor) ([]entity.Actor, error)
 
 	// admin reg
 	RegisterAdmin(tx *sql.Tx, adminReg entity.AdminReg) (int64, error)
