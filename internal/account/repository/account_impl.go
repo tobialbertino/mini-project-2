@@ -13,6 +13,81 @@ func NewAccountRepository() AccountRepository {
 	return &AccountRepositoryImpl{}
 }
 
+// UpdateAdminStatusByAdminID implements AccountRepository.
+func (*AccountRepositoryImpl) UpdateAdminStatusByAdminID(tx *sql.Tx, actor entity.Actor) (int64, error) {
+	SQL := `
+	UPDATE actors 
+	SET is_verified=?, is_active=? 
+	WHERE id = ?`
+	varArgs := []interface{}{
+		actor.IsVerified,
+		actor.IsActive,
+		actor.ID,
+	}
+
+	result, err := tx.Exec(SQL, varArgs...)
+	if err != nil {
+		return 0, err
+	}
+
+	i, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return i, nil
+}
+
+// UpdateAdminRegStatusByAdminID implements AccountRepository.
+func (*AccountRepositoryImpl) UpdateAdminRegStatusByAdminID(tx *sql.Tx, adminReg entity.AdminReg) (int64, error) {
+	SQL := `
+	UPDATE admin_reg 
+	SET status=?
+	WHERE admin_id = ?`
+	varArgs := []interface{}{
+		adminReg.Status,
+		adminReg.AdminId,
+	}
+
+	result, err := tx.Exec(SQL, varArgs...)
+	if err != nil {
+		return 0, err
+	}
+
+	i, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return i, nil
+}
+
+// GetAllApprovalAdmin implements AccountRepository.
+func (*AccountRepositoryImpl) GetAllApprovalAdmin(tx *sql.Tx) ([]entity.AdminReg, error) {
+	result := make([]entity.AdminReg, 0)
+
+	SQL := `
+	SELECT id, admin_id, super_admin_id, status
+	FROM admin_reg `
+
+	rows, err := tx.Query(SQL)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var res entity.AdminReg
+	for rows.Next() {
+		err := rows.Scan(&res.ID, &res.AdminId, &res.SuperAdminID, &res.Status)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, res)
+	}
+
+	return result, nil
+}
+
 // VerifyActorCredential implements AccountRepository.
 func (*AccountRepositoryImpl) VerifyActorCredential(tx *sql.Tx, actor entity.Actor) (entity.Actor, error) {
 	SQL := `

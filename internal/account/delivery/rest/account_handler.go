@@ -27,6 +27,64 @@ func (h *AccountHandler) Route(app *gin.Engine) {
 
 	g.POST("", h.AddActor)
 	g.POST("/login", h.Login)
+
+	// only super_admin
+	g.GET("/admin-reg", h.GetAllAppovalAdmin)
+	g.PUT("/admin-reg", h.UpdateAdminStatus)
+}
+
+func (h *AccountHandler) UpdateAdminStatus(c *gin.Context) {
+	var req ReqUpdateAdminStatus
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			exception.ValidationErrorTranslation(ve, c)
+			return
+		}
+		exception.NewClientError(400, err.Error(), c)
+		return
+	}
+
+	dmActor := domain.Actor{
+		ID:         req.AdminID,
+		IsVerified: req.IsVerified,
+		IsActive:   req.IsActive,
+	}
+	dmAdminReg := domain.AdminReg{
+		AdminId: req.AdminID,
+		Status:  req.Status,
+	}
+
+	result, err := h.AccountUseCase.UpdateAdminStatusByID(dmAdminReg, dmActor)
+	if err != nil {
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
+		return
+	}
+
+	res := RowsAffected{
+		Message:      "Success",
+		RowsAffected: result,
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *AccountHandler) GetAllAppovalAdmin(c *gin.Context) {
+
+	result, err := h.AccountUseCase.GetAllApprovalAdmin()
+	if err != nil {
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
+		return
+	}
+
+	res := RowsAffected{
+		Message:      "Success",
+		RowsAffected: result,
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *AccountHandler) AddActor(c *gin.Context) {
@@ -89,7 +147,7 @@ func (h *AccountHandler) Login(c *gin.Context) {
 
 	res := WebResponse{
 		Message: http.StatusText(http.StatusOK),
-		Data:    ToResponse(result),
+		Data:    ToResponseActor(result),
 	}
 
 	c.JSON(http.StatusOK, res)
