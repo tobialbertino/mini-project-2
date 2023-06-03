@@ -1,11 +1,14 @@
 package rest
 
 import (
+	"errors"
+	"miniProject2/exception"
 	"miniProject2/internal/account/model/domain"
 	"miniProject2/internal/account/usecase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type AccountHandler struct {
@@ -30,7 +33,12 @@ func (h *AccountHandler) AddActor(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			exception.ValidationErrorTranslation(ve, c)
+			return
+		}
+		exception.NewClientError(400, err.Error(), c)
 		return
 	}
 
@@ -41,7 +49,7 @@ func (h *AccountHandler) AddActor(c *gin.Context) {
 
 	result, err := h.AccountUseCase.AddActor(domain)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
 		return
 	}
 
@@ -58,7 +66,12 @@ func (h *AccountHandler) Login(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			exception.ValidationErrorTranslation(ve, c)
+			return
+		}
+		exception.NewClientError(http.StatusBadRequest, "Bad Request", c)
 		return
 	}
 
@@ -69,7 +82,7 @@ func (h *AccountHandler) Login(c *gin.Context) {
 
 	result, err := h.AccountUseCase.VerifyActorCredential(domain)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
 		return
 	}
 

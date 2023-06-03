@@ -58,6 +58,5 @@ VALUES (1, 'admin'),
 -- insert super admin, 
 -- username: super_admin, 
 -- password: password
-
 INSERT INTO actors(id, username, password, role_id, is_verified, is_active) 
 VALUES (1, 'super_admin', '$2a$04$e1it1T0mKhWvyvpIvbhMJuACG9qPS8DtV4laZnEpo6FPMTSk/CH1m', 2, 1, 1);
