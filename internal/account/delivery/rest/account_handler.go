@@ -21,6 +21,7 @@ func NewAccountHandler(AccountUC usecase.AccountUseCase) *AccountHandler {
 	}
 }
 
+// TODO: Implement Authentications through middleware
 func (h *AccountHandler) Route(app *gin.Engine) {
 	g := app.Group("/account")
 
