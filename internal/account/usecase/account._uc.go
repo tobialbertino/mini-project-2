@@ -13,4 +13,5 @@ type AccountUseCase interface {
 	// super_admin
 	GetAllApprovalAdmin() ([]domain.AdminReg, error)
 	UpdateAdminStatusByID(reqReg domain.AdminReg, reqActor domain.Actor) (int64, error)
+	DeleteAdminByID(req domain.Actor) (int64, error)
 }

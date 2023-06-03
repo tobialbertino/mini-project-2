@@ -7,7 +7,7 @@ CREATE TABLE role_actors (
     role_name VARCHAR(100),
 
     PRIMARY KEY(id)
-)
+);
 
 CREATE TABLE actors (
     id BIGINT UNSIGNED AUTO_INCREMENT,
@@ -20,8 +20,8 @@ CREATE TABLE actors (
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY(id),
-    FOREIGN KEY(role_id) REFERENCES role_actors(id)
-)
+    FOREIGN KEY(role_id) REFERENCES role_actors(id) ON DELETE CASCADE
+);
 
 CREATE TABLE customers (
     id BIGINT UNSIGNED AUTO_INCREMENT,
@@ -33,7 +33,7 @@ CREATE TABLE customers (
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     PRIMARY KEY(id)
-)
+);
 
 CREATE TABLE admin_reg (
     id BIGINT UNSIGNED AUTO_INCREMENT,
@@ -42,9 +42,9 @@ CREATE TABLE admin_reg (
     status VARCHAR(100),
 
     PRIMARY KEY(id),
-    FOREIGN KEY(admin_id) REFERENCES actors(id),
-    FOREIGN KEY(super_admin_id) REFERENCES actors(id)
-)
+    FOREIGN KEY(admin_id) REFERENCES actors(id) ON DELETE CASCADE,
+    FOREIGN KEY(super_admin_id) REFERENCES actors(id) ON DELETE CASCADE
+);
 
 CREATE TABLE authentications (
 	token TEXT NOT NULL

@@ -20,11 +20,15 @@ type ReqAddActor struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type ReqIDActor struct {
+	ID int64 `json:"id" binding:"required"`
+}
+
 type ReqUpdateAdminStatus struct {
 	AdminID    int64  `json:"admin_id" binding:"required"`
 	Status     string `json:"status" binding:"required"`
-	IsVerified bool   `json:"is_verified"`
-	IsActive   bool   `json:"is_active"`
+	IsVerified bool   `json:"is_verified" binding:"boolean"`
+	IsActive   bool   `json:"is_active" binding:"boolean"`
 }
 
 type ResponseActor struct {

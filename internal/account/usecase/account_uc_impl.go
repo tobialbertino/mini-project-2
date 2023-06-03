@@ -23,6 +23,25 @@ func NewAccountUseCase(AccountRepository repository.AccountRepository, DB *sql.D
 	}
 }
 
+// DeleteAdminByID implements AccountUseCase.
+func (uc *AccountUseCaseImpl) DeleteAdminByID(req domain.Actor) (int64, error) {
+	tx, err := uc.DB.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer helper.CommitOrRollback(err, tx)
+
+	entity := entity.Actor{
+		ID: req.ID,
+	}
+	result, err := uc.AccountRepository.DeleteAdminByID(tx, entity)
+	if err != nil {
+		return 0, err
+	}
+
+	return result, nil
+}
+
 // UpdateAdminStatusByID implements AccountUseCase.
 func (uc *AccountUseCaseImpl) UpdateAdminStatusByID(reqReg domain.AdminReg, reqActor domain.Actor) (int64, error) {
 	var wg sync.WaitGroup
@@ -30,6 +49,7 @@ func (uc *AccountUseCaseImpl) UpdateAdminStatusByID(reqReg domain.AdminReg, reqA
 	chErr1 := make(chan error, 1)
 	chErr2 := make(chan error, 1)
 	chInt := make(chan int64, 1)
+	chInt2 := make(chan int64, 1)
 
 	tx, err := uc.DB.Begin()
 	if err != nil {
@@ -65,7 +85,6 @@ func (uc *AccountUseCaseImpl) UpdateAdminStatusByID(reqReg domain.AdminReg, reqA
 		i, err := uc.AccountRepository.UpdateAdminRegStatusByAdminID(tx, etAdminReg)
 		if err != nil {
 			chErr1 <- err
-			return
 		}
 		chInt <- i
 	}()
@@ -74,22 +93,29 @@ func (uc *AccountUseCaseImpl) UpdateAdminStatusByID(reqReg domain.AdminReg, reqA
 	go func() {
 		defer wg.Done()
 		// update actor is_verified & is_active
-		_, err = uc.AccountRepository.UpdateAdminStatusByAdminID(tx, etActor)
+		i2, err := uc.AccountRepository.UpdateAdminStatusByAdminID(tx, etActor)
 		if err != nil {
 			chErr2 <- err
-			return
 		}
+		chInt2 <- i2
 	}()
 	wg.Wait()
 
-	select {
-	case result = <-chInt:
-		return result, nil
-	case err = <-chErr1:
-		return 0, err
-	case err = <-chErr2:
-		return 0, err
+	// get 2 channel data
+	var totalRowsAffected int64
+	for i := 0; i < 2; i++ {
+		select {
+		case result = <-chInt2:
+			totalRowsAffected += result
+		case result = <-chInt:
+			totalRowsAffected += result
+		case err = <-chErr1:
+			return 0, err
+		case err = <-chErr2:
+			return 0, err
+		}
 	}
+	return totalRowsAffected, nil
 }
 
 // GetAllApprovalAdmin implements AccountUseCase.

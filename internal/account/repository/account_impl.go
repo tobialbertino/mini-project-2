@@ -13,6 +13,30 @@ func NewAccountRepository() AccountRepository {
 	return &AccountRepositoryImpl{}
 }
 
+// DeleteAdminByID implements AccountRepository.
+func (*AccountRepositoryImpl) DeleteAdminByID(tx *sql.Tx, actor entity.Actor) (int64, error) {
+	SQL := `
+	DELETE FROM
+		actors
+	WHERE
+		id = ?`
+	varArgs := []interface{}{
+		actor.ID,
+	}
+
+	result, err := tx.Exec(SQL, varArgs...)
+	if err != nil {
+		return 0, err
+	}
+
+	i, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return i, nil
+}
+
 // UpdateAdminStatusByAdminID implements AccountRepository.
 func (*AccountRepositoryImpl) UpdateAdminStatusByAdminID(tx *sql.Tx, actor entity.Actor) (int64, error) {
 	SQL := `

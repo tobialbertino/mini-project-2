@@ -31,6 +31,38 @@ func (h *AccountHandler) Route(app *gin.Engine) {
 	// only super_admin
 	g.GET("/admin-reg", h.GetAllAppovalAdmin)
 	g.PUT("/admin-reg", h.UpdateAdminStatus)
+	g.DELETE("admin-reg", h.DeleteAdminByID)
+}
+
+func (h *AccountHandler) DeleteAdminByID(c *gin.Context) {
+	var req ReqIDActor
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			exception.ValidationErrorTranslation(ve, c)
+			return
+		}
+		exception.NewClientError(400, err.Error(), c)
+		return
+	}
+
+	dm := domain.Actor{
+		ID: req.ID,
+	}
+
+	result, err := h.AccountUseCase.DeleteAdminByID(dm)
+	if err != nil {
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
+		return
+	}
+
+	res := RowsAffected{
+		Message:      "Success",
+		RowsAffected: result,
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *AccountHandler) UpdateAdminStatus(c *gin.Context) {
