@@ -30,7 +30,7 @@ func (repo *CustomerRepositoryImpl) CreateCustomer(tx *sql.Tx, et entity.Custome
 		return 0, err
 	}
 
-	i, err := result.LastInsertId()
+	i, err := result.RowsAffected()
 	if err != nil {
 		return 0, err
 	}
@@ -129,11 +129,16 @@ func (repo *CustomerRepositoryImpl) GetCustomerByID(tx *sql.Tx, et entity.Custom
 // UpdateCustomerByID implements CustomerRepository.
 func (repo *CustomerRepositoryImpl) UpdateCustomerByID(tx *sql.Tx, et entity.Customer) (int64, error) {
 	SQL := `
-	DELETE FROM
+	UPDATE
 		customers
+	SET first_name=?, last_name=?, email=?, avatar=?
 	WHERE
 		id = ?`
 	varArgs := []interface{}{
+		et.FirstName,
+		et.LastName,
+		et.Email,
+		et.Avatar,
 		et.ID,
 	}
 

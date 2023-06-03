@@ -28,6 +28,9 @@ func (h *CustomerHandler) Route(app *gin.Engine) {
 
 	g.GET("", h.GetAllCustomer)
 	g.GET("/:id", h.GetCustomerByID)
+	g.POST("", h.CreateCustomer)
+	g.PUT("/:id", h.UpdateCustomerByID)
+	g.DELETE("/:id", h.DeleteCustomerByID)
 }
 
 func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
@@ -82,6 +85,103 @@ func (h *CustomerHandler) GetCustomerByID(c *gin.Context) {
 	res := WebResponse{
 		Message: "Success",
 		Data:    ToResponseCustomer(result),
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
+	var req ReqAddCustomer
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			exception.ValidationErrorTranslation(ve, c)
+			return
+		}
+		exception.NewClientError(400, err.Error(), c)
+		return
+	}
+
+	dm := domain.Customer{
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		Avatar:    req.Avatar,
+	}
+	result, err := h.CustomerUseCase.CreateCustomer(dm)
+	if err != nil {
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
+		return
+	}
+
+	res := RowsAffected{
+		Message:      "Success",
+		RowsAffected: result,
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *CustomerHandler) UpdateCustomerByID(c *gin.Context) {
+	id := c.Param("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		exception.NewClientError(400, err.Error(), c)
+	}
+
+	var req ReqAddCustomer
+	err = c.ShouldBindJSON(&req)
+	if err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			exception.ValidationErrorTranslation(ve, c)
+			return
+		}
+		exception.NewClientError(400, err.Error(), c)
+		return
+	}
+
+	dm := domain.Customer{
+		ID:        int64(idInt),
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		Avatar:    req.Avatar,
+	}
+	result, err := h.CustomerUseCase.UpdateCustomerByID(dm)
+	if err != nil {
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
+		return
+	}
+
+	res := RowsAffected{
+		Message:      "Success",
+		RowsAffected: result,
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *CustomerHandler) DeleteCustomerByID(c *gin.Context) {
+	id := c.Param("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		exception.NewClientError(400, err.Error(), c)
+	}
+
+	dm := domain.Customer{
+		ID: int64(idInt),
+	}
+	result, err := h.CustomerUseCase.DeleteCustomerByID(dm)
+	if err != nil {
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
+		return
+	}
+
+	res := RowsAffected{
+		Message:      "Success",
+		RowsAffected: result,
 	}
 
 	c.JSON(http.StatusOK, res)

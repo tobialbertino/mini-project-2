@@ -110,9 +110,13 @@ func (uc *CustomerUseCaseImpl) UpdateCustomerByID(dt domain.Customer) (int64, er
 	defer helper.CommitOrRollback(err, tx)
 
 	et := entity.Customer{
-		ID: dt.ID,
+		ID:        dt.ID,
+		FirstName: dt.FirstName,
+		LastName:  dt.LastName,
+		Email:     dt.Email,
+		Avatar:    dt.Avatar,
 	}
-	res, err := uc.CustomerRepository.DeleteCustomerByID(tx, et)
+	res, err := uc.CustomerRepository.UpdateCustomerByID(tx, et)
 	if err != nil {
 		return 0, err
 	}

@@ -31,6 +31,13 @@ type Customer struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type ReqAddCustomer struct {
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
+	Email     string `json:"email" binding:"required,email"`
+	Avatar    string `json:"avatar" binding:"required"`
+}
+
 func ToResponseCustomer(dt domain.Customer) Customer {
 	return Customer{
 		ID:        dt.ID,
