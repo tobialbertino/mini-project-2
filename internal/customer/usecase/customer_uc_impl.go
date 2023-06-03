@@ -13,7 +13,7 @@ type CustomerUseCaseImpl struct {
 	DB                 *sql.DB
 }
 
-func NewCustomerRepository(CustomerRepo repository.CustomerRepository, DB *sql.DB) CustomertUseCase {
+func NewCustomerUseCase(CustomerRepo repository.CustomerRepository, DB *sql.DB) CustomertUseCase {
 	return &CustomerUseCaseImpl{
 		CustomerRepository: CustomerRepo,
 		DB:                 DB,

@@ -70,7 +70,7 @@ func (repo *CustomerRepositoryImpl) GetAllCustomer(tx *sql.Tx, et entity.Custome
 	SELECT id, first_name, last_name, email, avatar, created_at, updated_at
 	FROM customers
 	WHERE LOWER(first_name) LIKE ?
-	OR LOWER(lastName) LIKE ?
+	OR LOWER(last_name) LIKE ?
 	AND LOWER(email) like ?`
 	varArgs := []interface{}{
 		fmt.Sprintf("%%%s%%", et.FirstName),
