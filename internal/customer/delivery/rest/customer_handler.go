@@ -6,6 +6,7 @@ import (
 	"miniProject2/internal/customer/model/domain"
 	"miniProject2/internal/customer/usecase"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -26,6 +27,7 @@ func (h *CustomerHandler) Route(app *gin.Engine) {
 	g := app.Group("/customer")
 
 	g.GET("", h.GetAllCustomer)
+	g.GET("/:id", h.GetCustomerByID)
 }
 
 func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
@@ -56,6 +58,30 @@ func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
 	res := WebResponse{
 		Message: "Success",
 		Data:    ToResponseListCustomer(result),
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *CustomerHandler) GetCustomerByID(c *gin.Context) {
+	id := c.Param("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		exception.NewClientError(400, err.Error(), c)
+	}
+
+	dm := domain.Customer{
+		ID: int64(idInt),
+	}
+	result, err := h.CustomerUseCase.GetCustomerByID(dm)
+	if err != nil {
+		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
+		return
+	}
+
+	res := WebResponse{
+		Message: "Success",
+		Data:    ToResponseCustomer(result),
 	}
 
 	c.JSON(http.StatusOK, res)
