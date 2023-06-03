@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	entity "miniProject2/internal/customer/model/entoty"
+	"miniProject2/internal/customer/model/entity"
 )
 
 type CustomerRepositoryImpl struct{}

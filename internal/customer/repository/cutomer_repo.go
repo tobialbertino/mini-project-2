@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	entity "miniProject2/internal/customer/model/entoty"
+	"miniProject2/internal/customer/model/entity"
 )
 
 type CustomerRepository interface {
