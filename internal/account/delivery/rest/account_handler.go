@@ -26,7 +26,7 @@ func NewAccountHandler(AccountUC usecase.AccountUseCase) *AccountHandler {
 func (h *AccountHandler) Route(app *gin.Engine) {
 	g := app.Group("/account")
 
-	g.GET("", h.GetAllAdmin)
+	g.GET("", h.GetAllAdmin) // TODO: implement goroutine
 	g.POST("", h.AddActor)
 	g.POST("/login", h.Login) // TODO: implement authentications
 

@@ -26,7 +26,7 @@ func NewCustomerHandler(CustomerUC usecase.CustomertUseCase) *CustomerHandler {
 func (h *CustomerHandler) Route(app *gin.Engine) {
 	g := app.Group("/customer")
 
-	g.GET("", h.GetAllCustomer)
+	g.GET("", h.GetAllCustomer) // TODO: implement goroutine
 	g.GET("/:id", h.GetCustomerByID)
 	g.POST("", h.CreateCustomer)
 	g.PUT("/:id", h.UpdateCustomerByID)
