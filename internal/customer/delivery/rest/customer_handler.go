@@ -35,7 +35,13 @@ func (h *CustomerHandler) Route(app *gin.Engine) {
 
 func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
 	var req ReqGetAllCustomer
-	err := c.ShouldBindJSON(&req)
+	page := c.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		exception.NewClientError(400, err.Error(), c)
+	}
+
+	err = c.ShouldBindJSON(&req)
 	if err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
@@ -51,16 +57,29 @@ func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
 		LastName:  req.LastName,
 		Email:     req.Email,
 	}
+	dmPaging := domain.Pagiantion{
+		Page: pageInt,
+	}
 
-	result, err := h.CustomerUseCase.GetAllCustomer(dm)
+	result, resultPaging, err := h.CustomerUseCase.GetAllCustomer(dm, dmPaging)
 	if err != nil {
 		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
 		return
 	}
 
+	combineResult := ResGetAllCustomerWithPaging{
+		Pagination: Pagination{
+			Page:       resultPaging.Page,
+			PerPage:    resultPaging.PerPage,
+			Total:      resultPaging.Total,
+			TotalPages: resultPaging.TotalPages,
+		},
+		Customer: ToResponseListCustomer(result),
+	}
+
 	res := WebResponse{
 		Message: "Success",
-		Data:    ToResponseListCustomer(result),
+		Data:    combineResult,
 	}
 
 	c.JSON(http.StatusOK, res)

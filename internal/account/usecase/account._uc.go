@@ -9,7 +9,8 @@ type AccountUseCase interface {
 	VerifyActorCredential(req domain.Actor) (domain.Actor, error)
 	// actor
 	AddActor(req domain.Actor) (int64, error)
-	GetAllAdmin(req domain.Actor) ([]domain.Actor, error)
+	// GetAllAdmin With Pagination
+	GetAllAdmin(req domain.Actor, pagi domain.Pagiantion) ([]domain.Actor, domain.Pagiantion, error)
 
 	// super_admin
 	GetAllApprovalAdmin() ([]domain.AdminReg, error)

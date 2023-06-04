@@ -6,7 +6,11 @@ import (
 )
 
 type CustomerRepository interface {
-	GetAllCustomer(tx *sql.Tx, et entity.Customer) ([]entity.Customer, error)
+	// pagination
+	Pagination(tx *sql.Tx, et entity.Pagiantion) (entity.Pagiantion, error) // only Get Total Data
+	GetAllCustomer(tx *sql.Tx, et entity.Customer, etPaging entity.Pagiantion) ([]entity.Customer, error)
+	// get count total data
+
 	GetCustomerByID(tx *sql.Tx, et entity.Customer) (entity.Customer, error)
 
 	CreateCustomer(tx *sql.Tx, et entity.Customer) (int64, error)

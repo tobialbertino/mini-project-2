@@ -6,6 +6,7 @@ import (
 	"miniProject2/internal/account/model/domain"
 	"miniProject2/internal/account/usecase"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -25,7 +26,7 @@ func NewAccountHandler(AccountUC usecase.AccountUseCase) *AccountHandler {
 func (h *AccountHandler) Route(app *gin.Engine) {
 	g := app.Group("/account")
 
-	g.GET("", h.GetAllAdmin) // TODO: Implement pagination
+	g.GET("", h.GetAllAdmin)
 	g.POST("", h.AddActor)
 	g.POST("/login", h.Login) // TODO: implement authentications
 
@@ -36,21 +37,40 @@ func (h *AccountHandler) Route(app *gin.Engine) {
 }
 
 func (h *AccountHandler) GetAllAdmin(c *gin.Context) {
+	page := c.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		exception.NewClientError(400, err.Error(), c)
+	}
 	username := c.Query("username")
 
 	dm := domain.Actor{
 		Username: username,
 	}
+	dmPaging := domain.Pagiantion{
+		Page: pageInt,
+	}
 
-	result, err := h.AccountUseCase.GetAllAdmin(dm)
+	result, paging, err := h.AccountUseCase.GetAllAdmin(dm, dmPaging)
 	if err != nil {
 		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
 		return
 	}
 
+	// combine result
+	combineResult := ResGetAllAdminWithPaging{
+		Pagination: Pagination{
+			Page:       paging.Page,
+			PerPage:    paging.PerPage,
+			Total:      paging.Total,
+			TotalPages: paging.TotalPages,
+		},
+		Admins: ResponseListActor(result),
+	}
+
 	res := WebResponse{
 		Message: "Success",
-		Data:    ResponseListActor(result),
+		Data:    combineResult,
 	}
 
 	c.JSON(http.StatusOK, res)

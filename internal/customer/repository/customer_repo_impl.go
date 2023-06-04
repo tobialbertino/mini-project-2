@@ -13,6 +13,31 @@ func NewCustomerRepository() CustomerRepository {
 	return &CustomerRepositoryImpl{}
 }
 
+// Pagination implements CustomerRepository.
+func (repo *CustomerRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagiantion) (entity.Pagiantion, error) {
+	var res entity.Pagiantion
+
+	SQL := `
+	SELECT count(id) FROM
+	customers c`
+	varArgs := []interface{}{}
+
+	rows, err := tx.Query(SQL, varArgs...)
+	if err != nil {
+		return entity.Pagiantion{}, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		err := rows.Scan(&res.Total)
+		if err != nil {
+			return entity.Pagiantion{}, err
+		}
+	}
+
+	return res, nil
+}
+
 // CreateCustomer implements CustomerRepository.
 func (repo *CustomerRepositoryImpl) CreateCustomer(tx *sql.Tx, et entity.Customer) (int64, error) {
 	SQL := `
@@ -63,7 +88,7 @@ func (repo *CustomerRepositoryImpl) DeleteCustomerByID(tx *sql.Tx, et entity.Cus
 }
 
 // GetAllCustomer implements CustomerRepository.
-func (repo *CustomerRepositoryImpl) GetAllCustomer(tx *sql.Tx, et entity.Customer) ([]entity.Customer, error) {
+func (repo *CustomerRepositoryImpl) GetAllCustomer(tx *sql.Tx, et entity.Customer, etPaging entity.Pagiantion) ([]entity.Customer, error) {
 	result := make([]entity.Customer, 0)
 
 	SQL := `
@@ -71,11 +96,14 @@ func (repo *CustomerRepositoryImpl) GetAllCustomer(tx *sql.Tx, et entity.Custome
 	FROM customers
 	WHERE LOWER(first_name) LIKE ?
 	OR LOWER(last_name) LIKE ?
-	AND LOWER(email) like ?`
+	AND LOWER(email) like ?
+	LIMIT ?, ?`
 	varArgs := []interface{}{
 		fmt.Sprintf("%%%s%%", et.FirstName),
 		fmt.Sprintf("%%%s%%", et.LastName),
 		fmt.Sprintf("%%%s%%", et.Email),
+		etPaging.Offset,
+		etPaging.PerPage,
 	}
 
 	rows, err := tx.Query(SQL, varArgs...)

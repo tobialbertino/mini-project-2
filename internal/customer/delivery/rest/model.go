@@ -31,6 +31,18 @@ type Customer struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type Pagination struct {
+	Page       int `json:"page"`
+	PerPage    int `json:"per_page"`
+	Total      int `json:"total"`
+	TotalPages int `json:"total_pages"`
+}
+
+type ResGetAllCustomerWithPaging struct {
+	Pagination
+	Customer []Customer `json:"customers"`
+}
+
 type ReqAddCustomer struct {
 	FirstName string `json:"first_name" binding:"required"`
 	LastName  string `json:"last_name" binding:"required"`

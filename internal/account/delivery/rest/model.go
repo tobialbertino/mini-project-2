@@ -31,6 +31,18 @@ type ReqUpdateAdminStatus struct {
 	IsActive   bool   `json:"is_active" binding:"boolean"`
 }
 
+type Pagination struct {
+	Page       int `json:"page"`
+	PerPage    int `json:"per_page"`
+	Total      int `json:"total"`
+	TotalPages int `json:"total_pages"`
+}
+
+type ResGetAllAdminWithPaging struct {
+	Pagination
+	Admins []ResponseActor `json:"admin"`
+}
+
 type ResponseActor struct {
 	ID         int64     `json:"id"`
 	Username   string    `json:"username"`

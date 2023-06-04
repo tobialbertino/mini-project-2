@@ -13,17 +13,47 @@ func NewAccountRepository() AccountRepository {
 	return &AccountRepositoryImpl{}
 }
 
+// Pagination implements CustomerRepository.
+func (repo *AccountRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagiantion) (entity.Pagiantion, error) {
+	var res entity.Pagiantion
+
+	SQL := `
+	SELECT count(id) 
+	FROM actors
+	WHERE role_id = 1
+	`
+	varArgs := []interface{}{}
+
+	rows, err := tx.Query(SQL, varArgs...)
+	if err != nil {
+		return entity.Pagiantion{}, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		err := rows.Scan(&res.Total)
+		if err != nil {
+			return entity.Pagiantion{}, err
+		}
+	}
+
+	return res, nil
+}
+
 // GetAllAdmin implements AccountRepository.
-func (repo *AccountRepositoryImpl) GetAllAdmin(tx *sql.Tx, actor entity.Actor) ([]entity.Actor, error) {
+func (repo *AccountRepositoryImpl) GetAllAdmin(tx *sql.Tx, actor entity.Actor, etPage entity.Pagiantion) ([]entity.Actor, error) {
 	result := make([]entity.Actor, 0)
 
 	SQL := `
 	SELECT id, username, role_id, is_verified, is_active, created_at, updated_at
 	FROM actors
 	WHERE LOWER(username) LIKE ?
-	AND role_id = 1`
+	AND role_id = 1
+	LIMIT ?, ?`
 	varArgs := []interface{}{
 		fmt.Sprintf("%%%s%%", actor.Username),
+		etPage.Offset,
+		etPage.PerPage,
 	}
 
 	rows, err := tx.Query(SQL, varArgs...)
