@@ -115,17 +115,6 @@ func (uc *AccountUseCaseImpl) UpdateAdminStatusByID(reqReg domain.AdminReg, reqA
 		IsActive:   reqActor.IsActive,
 	}
 
-	// update admin_reg status only
-	// i, err := uc.AccountRepository.UpdateAdminRegStatusByAdminID(tx, etAdminReg)
-	// if err != nil {
-	// 	return 0, err
-	// }
-
-	// update actor is_verified & is_active
-	// _, err = uc.AccountRepository.UpdateAdminStatusByAdminID(tx, etActor)
-	// if err != nil {
-	// 	return 0, err
-	// }
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -210,7 +199,7 @@ func (uc *AccountUseCaseImpl) VerifyActorCredential(req domain.Actor) (domain.Re
 	// generate token jwt
 	// Create the Claims
 	myClaims := tokenize.AccountClaims{
-		ID:         userDetail.ID,
+		IDNum:      userDetail.ID,
 		RoleID:     userDetail.RoleID,
 		IsVerified: userDetail.IsVerified,
 		IsActive:   userDetail.IsActive,

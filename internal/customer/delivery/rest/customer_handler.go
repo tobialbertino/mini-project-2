@@ -4,6 +4,7 @@ import (
 	"miniProject2/exception"
 	"miniProject2/internal/customer/model/domain"
 	"miniProject2/internal/customer/usecase"
+	"miniProject2/pkg/middleware"
 	"net/http"
 	"strconv"
 
@@ -20,9 +21,8 @@ func NewCustomerHandler(CustomerUC usecase.CustomertUseCase) *CustomerHandler {
 	}
 }
 
-// TODO: Implement Authentications through middleware
 func (h *CustomerHandler) Route(app *gin.Engine) {
-	g := app.Group("/customer")
+	g := app.Group("/customer", middleware.Auth())
 
 	g.GET("", h.GetAllCustomer) // TODO: implement goroutine
 	g.GET("/:id", h.GetCustomerByID)
@@ -37,6 +37,7 @@ func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		exception.NewClientError(400, err.Error(), c)
+		return
 	}
 
 	err = c.ShouldBindJSON(&req)
@@ -75,6 +76,7 @@ func (h *CustomerHandler) GetCustomerByID(c *gin.Context) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		exception.NewClientError(400, err.Error(), c)
+		return
 	}
 
 	dm := domain.Customer{
@@ -128,6 +130,7 @@ func (h *CustomerHandler) UpdateCustomerByID(c *gin.Context) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		exception.NewClientError(400, err.Error(), c)
+		return
 	}
 
 	var req ReqAddCustomer
@@ -164,6 +167,7 @@ func (h *CustomerHandler) DeleteCustomerByID(c *gin.Context) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		exception.NewClientError(400, err.Error(), c)
+		return
 	}
 
 	dm := domain.Customer{

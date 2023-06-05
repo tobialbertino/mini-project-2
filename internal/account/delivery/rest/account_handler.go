@@ -23,16 +23,16 @@ func NewAccountHandler(AccountUC usecase.AccountUseCase) *AccountHandler {
 
 // TODO: Implement Authentications through middleware
 func (h *AccountHandler) Route(app *gin.Engine) {
-	app.POST("/login", h.Login)
+	app.POST("/login", h.Login) // Generate token JWT
 
-	g := app.Group("/account", middleware.Auth())
-	g.GET("", h.GetAllAdmin) // TODO: implement goroutine
+	g := app.Group("/account", middleware.Auth()) // using middleware
+	g.GET("", h.GetAllAdmin)                      // TODO: implement goroutine
 	g.POST("", h.AddActor)
 
 	// only super_admin
-	g.GET("/admin-reg", h.GetAllAppovalAdmin) // TODO: implement authentications
-	g.PUT("/admin-reg", h.UpdateAdminStatus)
-	g.DELETE("/admin-reg", h.DeleteAdminByID)
+	g.GET("/admin-reg", middleware.AuthSuperAdmin(), h.GetAllAppovalAdmin)
+	g.PUT("/admin-reg", middleware.AuthSuperAdmin(), h.UpdateAdminStatus)
+	g.DELETE("/admin-reg", middleware.AuthSuperAdmin(), h.DeleteAdminByID)
 }
 
 func (h *AccountHandler) GetAllAdmin(c *gin.Context) {
@@ -40,6 +40,7 @@ func (h *AccountHandler) GetAllAdmin(c *gin.Context) {
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		exception.NewClientError(400, err.Error(), c)
+		return
 	}
 	username := c.Query("username")
 
@@ -189,8 +190,6 @@ func (h *AccountHandler) Login(c *gin.Context) {
 		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
 		return
 	}
-
-	// generate token jwt
 
 	res := WebResponse{
 		Message: http.StatusText(http.StatusOK),
