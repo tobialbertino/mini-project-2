@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"errors"
 	"miniProject2/exception"
 	"miniProject2/internal/customer/model/domain"
 	"miniProject2/internal/customer/usecase"
@@ -9,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type CustomerHandler struct {
@@ -43,12 +41,7 @@ func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
 
 	err = c.ShouldBindJSON(&req)
 	if err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			exception.ValidationErrorTranslation(ve, c)
-			return
-		}
-		exception.NewClientError(400, err.Error(), c)
+		exception.BindJSONError(err, c)
 		return
 	}
 
@@ -103,14 +96,10 @@ func (h *CustomerHandler) GetCustomerByID(c *gin.Context) {
 
 func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
 	var req ReqAddCustomer
+
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			exception.ValidationErrorTranslation(ve, c)
-			return
-		}
-		exception.NewClientError(400, err.Error(), c)
+		exception.BindJSONError(err, c)
 		return
 	}
 
@@ -142,14 +131,10 @@ func (h *CustomerHandler) UpdateCustomerByID(c *gin.Context) {
 	}
 
 	var req ReqAddCustomer
+
 	err = c.ShouldBindJSON(&req)
 	if err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			exception.ValidationErrorTranslation(ve, c)
-			return
-		}
-		exception.NewClientError(400, err.Error(), c)
+		exception.BindJSONError(err, c)
 		return
 	}
 

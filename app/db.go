@@ -3,13 +3,14 @@ package app
 import (
 	"database/sql"
 	"fmt"
+	"miniProject2/pkg/config"
 	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func NewDB(cfg *Config) *sql.DB {
+func NewDB(cfg *config.Config) *sql.DB {
 	DNS := fmt.Sprintf("%s:%s@%s(%s:%s)/%s?parseTime=true",
 		cfg.DB.Username,
 		cfg.DB.Password,

@@ -8,7 +8,9 @@ import (
 	"miniProject2/internal/account/repository"
 	"miniProject2/pkg/helper"
 	"miniProject2/pkg/security"
+	"miniProject2/pkg/tokenize"
 	"sync"
+	"time"
 )
 
 type AccountUseCaseImpl struct {
@@ -182,10 +184,10 @@ func (uc *AccountUseCaseImpl) GetAllApprovalAdmin() ([]domain.AdminReg, error) {
 }
 
 // VerifyActorCredential implements AccountUseCase.
-func (uc *AccountUseCaseImpl) VerifyActorCredential(req domain.Actor) (domain.Actor, error) {
+func (uc *AccountUseCaseImpl) VerifyActorCredential(req domain.Actor) (domain.ResToken, error) {
 	tx, err := uc.DB.Begin()
 	if err != nil {
-		return domain.Actor{}, err
+		return domain.ResToken{}, err
 	}
 	defer helper.CommitOrRollback(err, tx)
 
@@ -195,15 +197,34 @@ func (uc *AccountUseCaseImpl) VerifyActorCredential(req domain.Actor) (domain.Ac
 	}
 	result, err := uc.AccountRepository.VerifyActorCredential(tx, entity)
 	if err != nil {
-		return domain.Actor{}, err
+		return domain.ResToken{}, err
 	}
 
 	// compare password
 	isValid := security.CheckPasswordHash(req.Password, result.Password)
 	if !isValid {
-		return domain.Actor{}, errors.New("invalid username or password")
+		return domain.ResToken{}, errors.New("invalid username or password")
 	}
-	res := DTOActor(result)
+	userDetail := DTOActor(result)
+
+	// generate token jwt
+	// Create the Claims
+	myClaims := tokenize.AccountClaims{
+		ID:         userDetail.ID,
+		RoleID:     userDetail.RoleID,
+		IsVerified: userDetail.IsVerified,
+		IsActive:   userDetail.IsActive,
+		ExpiresAt:  time.Now().Add(time.Hour * 1).Unix(),
+	}
+
+	token, err := tokenize.GenerateAccessToken(myClaims)
+	if err != nil {
+		return domain.ResToken{}, err
+	}
+
+	res := domain.ResToken{
+		AccessToken: token,
+	}
 	return res, nil
 }
 

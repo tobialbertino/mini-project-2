@@ -3,13 +3,14 @@ package main
 import (
 	"log"
 	"miniProject2/app"
+	"miniProject2/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	// load config
-	config, err := app.LoadConfig()
+	config, err := config.LoadConfig()
 	if err != nil {
 		log.Printf("error loading config: %s", err)
 	}

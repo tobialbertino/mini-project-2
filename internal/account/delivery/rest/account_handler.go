@@ -1,15 +1,14 @@
 package rest
 
 import (
-	"errors"
 	"miniProject2/exception"
 	"miniProject2/internal/account/model/domain"
 	"miniProject2/internal/account/usecase"
+	"miniProject2/pkg/middleware"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type AccountHandler struct {
@@ -24,14 +23,14 @@ func NewAccountHandler(AccountUC usecase.AccountUseCase) *AccountHandler {
 
 // TODO: Implement Authentications through middleware
 func (h *AccountHandler) Route(app *gin.Engine) {
-	g := app.Group("/account")
+	app.POST("/login", h.Login)
 
+	g := app.Group("/account", middleware.Auth())
 	g.GET("", h.GetAllAdmin) // TODO: implement goroutine
 	g.POST("", h.AddActor)
-	g.POST("/login", h.Login) // TODO: implement authentications
 
 	// only super_admin
-	g.GET("/admin-reg", h.GetAllAppovalAdmin)
+	g.GET("/admin-reg", h.GetAllAppovalAdmin) // TODO: implement authentications
 	g.PUT("/admin-reg", h.UpdateAdminStatus)
 	g.DELETE("/admin-reg", h.DeleteAdminByID)
 }
@@ -72,12 +71,7 @@ func (h *AccountHandler) DeleteAdminByID(c *gin.Context) {
 	var req ReqIDActor
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			exception.ValidationErrorTranslation(ve, c)
-			return
-		}
-		exception.NewClientError(400, err.Error(), c)
+		exception.BindJSONError(err, c)
 		return
 	}
 
@@ -104,12 +98,7 @@ func (h *AccountHandler) UpdateAdminStatus(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			exception.ValidationErrorTranslation(ve, c)
-			return
-		}
-		exception.NewClientError(400, err.Error(), c)
+		exception.BindJSONError(err, c)
 		return
 	}
 
@@ -158,12 +147,7 @@ func (h *AccountHandler) AddActor(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			exception.ValidationErrorTranslation(ve, c)
-			return
-		}
-		exception.NewClientError(400, err.Error(), c)
+		exception.BindJSONError(err, c)
 		return
 	}
 
@@ -191,12 +175,7 @@ func (h *AccountHandler) Login(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			exception.ValidationErrorTranslation(ve, c)
-			return
-		}
-		exception.NewClientError(http.StatusBadRequest, "Bad Request", c)
+		exception.BindJSONError(err, c)
 		return
 	}
 
@@ -211,9 +190,11 @@ func (h *AccountHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// generate token jwt
+
 	res := WebResponse{
 		Message: http.StatusText(http.StatusOK),
-		Data:    ToResponseActor(result),
+		Data:    result,
 	}
 
 	c.JSON(http.StatusOK, res)

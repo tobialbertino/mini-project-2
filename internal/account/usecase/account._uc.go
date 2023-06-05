@@ -6,7 +6,7 @@ import (
 
 type AccountUseCase interface {
 	// auth
-	VerifyActorCredential(req domain.Actor) (domain.Actor, error)
+	VerifyActorCredential(req domain.Actor) (domain.ResToken, error) // generate token jwt
 	// actor
 	AddActor(req domain.Actor) (int64, error)
 	// GetAllAdmin With Pagination
