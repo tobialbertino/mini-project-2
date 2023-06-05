@@ -1,6 +1,6 @@
 package domain
 
-type Pagiantion struct {
+type Pagination struct {
 	Page       int
 	PerPage    int
 	Total      int

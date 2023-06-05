@@ -24,15 +24,15 @@ func NewAccountUseCase(AccountRepository repository.AccountRepository, DB *sql.D
 }
 
 // GetAllAdmin implements AccountUseCase.
-func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Pagiantion) ([]domain.Actor, domain.Pagiantion, error) {
+func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Pagination) (domain.ListActorWithPaging, error) {
 	tx, err := uc.DB.Begin()
 	if err != nil {
-		return []domain.Actor{}, domain.Pagiantion{}, err
+		return domain.ListActorWithPaging{}, err
 	}
 	defer helper.CommitOrRollback(err, tx)
 
 	// define pagination
-	etPaging := entity.Pagiantion{
+	etPaging := entity.Pagination{
 		Page:       pagi.Page,
 		PerPage:    6,                   // always fix 6 data == LIMIT
 		Total:      0,                   // after query
@@ -45,13 +45,13 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Pagianti
 
 	result, err := uc.AccountRepository.GetAllAdmin(tx, et, etPaging)
 	if err != nil {
-		return []domain.Actor{}, domain.Pagiantion{}, err
+		return domain.ListActorWithPaging{}, err
 	}
 
 	// Get Total Data
 	resPaging, err := uc.AccountRepository.Pagination(tx, etPaging)
 	if err != nil {
-		return []domain.Actor{}, domain.Pagiantion{}, err
+		return domain.ListActorWithPaging{}, err
 	}
 
 	totalPages := resPaging.Total / 6
@@ -61,7 +61,12 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Pagianti
 	etPaging.Total = resPaging.Total
 	etPaging.TotalPages = totalPages
 
-	return DTOActorList(result), domain.Pagiantion(etPaging), nil
+	combineRes := domain.ListActorWithPaging{
+		Pagination: domain.Pagination(etPaging),
+		Admins:     DTOActorList(result),
+	}
+
+	return combineRes, nil
 }
 
 // DeleteAdminByID implements AccountUseCase.

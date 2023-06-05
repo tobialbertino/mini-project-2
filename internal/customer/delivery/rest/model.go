@@ -36,11 +36,25 @@ type Pagination struct {
 	PerPage    int `json:"per_page"`
 	Total      int `json:"total"`
 	TotalPages int `json:"total_pages"`
+	Offset     int `json:"-"`
 }
 
 type ResGetAllCustomerWithPaging struct {
 	Pagination
 	Customer []Customer `json:"customers"`
+}
+
+func ToResGetAllCustomerWithPaging(dm domain.ListActorWithPaging) ResGetAllCustomerWithPaging {
+	return ResGetAllCustomerWithPaging{
+		Pagination: Pagination{
+			Page:       dm.Page,
+			PerPage:    dm.PerPage,
+			Total:      dm.Total,
+			TotalPages: dm.TotalPages,
+			Offset:     dm.Offset,
+		},
+		Customer: ToResponseListCustomer(dm.Customers),
+	}
 }
 
 type ReqAddCustomer struct {

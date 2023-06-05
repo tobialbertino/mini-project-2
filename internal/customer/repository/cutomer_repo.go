@@ -7,8 +7,8 @@ import (
 
 type CustomerRepository interface {
 	// pagination
-	Pagination(tx *sql.Tx, et entity.Pagiantion) (entity.Pagiantion, error) // only Get Total Data
-	GetAllCustomer(tx *sql.Tx, et entity.Customer, etPaging entity.Pagiantion) ([]entity.Customer, error)
+	Pagination(tx *sql.Tx, et entity.Pagination) (entity.Pagination, error) // only Get Total Data
+	GetAllCustomer(tx *sql.Tx, et entity.Customer, etPaging entity.Pagination) ([]entity.Customer, error)
 	// get count total data
 
 	GetCustomerByID(tx *sql.Tx, et entity.Customer) (entity.Customer, error)

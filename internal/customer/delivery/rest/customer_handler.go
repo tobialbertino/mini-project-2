@@ -57,25 +57,17 @@ func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
 		LastName:  req.LastName,
 		Email:     req.Email,
 	}
-	dmPaging := domain.Pagiantion{
+	dmPaging := domain.Pagination{
 		Page: pageInt,
 	}
 
-	result, resultPaging, err := h.CustomerUseCase.GetAllCustomer(dm, dmPaging)
+	result, err := h.CustomerUseCase.GetAllCustomer(dm, dmPaging)
 	if err != nil {
 		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
 		return
 	}
 
-	combineResult := ResGetAllCustomerWithPaging{
-		Pagination: Pagination{
-			Page:       resultPaging.Page,
-			PerPage:    resultPaging.PerPage,
-			Total:      resultPaging.Total,
-			TotalPages: resultPaging.TotalPages,
-		},
-		Customer: ToResponseListCustomer(result),
-	}
+	combineResult := ToResGetAllCustomerWithPaging(result)
 
 	res := WebResponse{
 		Message: "Success",

@@ -12,3 +12,8 @@ type Actor struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
+
+type ListActorWithPaging struct {
+	Pagination
+	Admins []Actor
+}

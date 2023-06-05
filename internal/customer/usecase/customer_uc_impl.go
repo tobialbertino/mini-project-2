@@ -62,15 +62,15 @@ func (uc *CustomerUseCaseImpl) DeleteCustomerByID(dt domain.Customer) (int64, er
 }
 
 // GetAllCustomer implements CustomertUseCase.
-func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pagiantion) ([]domain.Customer, domain.Pagiantion, error) {
+func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pagination) (domain.ListActorWithPaging, error) {
 	tx, err := uc.DB.Begin()
 	if err != nil {
-		return []domain.Customer{}, domain.Pagiantion{}, err
+		return domain.ListActorWithPaging{}, err
 	}
 	defer helper.CommitOrRollback(err, tx)
 
 	// define pagination
-	etPaging := entity.Pagiantion{
+	etPaging := entity.Pagination{
 		Page:       pagi.Page,
 		PerPage:    6,                   // always fix 6 data == LIMIT
 		Total:      0,                   // after query
@@ -86,13 +86,13 @@ func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pa
 	// get all customer with pagination
 	res, err := uc.CustomerRepository.GetAllCustomer(tx, et, etPaging)
 	if err != nil {
-		return []domain.Customer{}, domain.Pagiantion{}, err
+		return domain.ListActorWithPaging{}, err
 	}
 
 	// Get Total Data
 	resPaging, err := uc.CustomerRepository.Pagination(tx, etPaging)
 	if err != nil {
-		return []domain.Customer{}, domain.Pagiantion{}, err
+		return domain.ListActorWithPaging{}, err
 	}
 
 	totalPages := resPaging.Total / 6
@@ -102,7 +102,12 @@ func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pa
 	etPaging.Total = resPaging.Total
 	etPaging.TotalPages = totalPages
 
-	return DTOListCustomer(res), domain.Pagiantion(etPaging), nil
+	combineRes := domain.ListActorWithPaging{
+		Pagination: domain.Pagination(etPaging),
+		Customers:  DTOListCustomer(res),
+	}
+
+	return combineRes, nil
 }
 
 // GetCustomerByID implements CustomertUseCase.

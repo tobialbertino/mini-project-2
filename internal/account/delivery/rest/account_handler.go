@@ -47,26 +47,18 @@ func (h *AccountHandler) GetAllAdmin(c *gin.Context) {
 	dm := domain.Actor{
 		Username: username,
 	}
-	dmPaging := domain.Pagiantion{
+	dmPaging := domain.Pagination{
 		Page: pageInt,
 	}
 
-	result, paging, err := h.AccountUseCase.GetAllAdmin(dm, dmPaging)
+	result, err := h.AccountUseCase.GetAllAdmin(dm, dmPaging)
 	if err != nil {
 		exception.NewInternalError(http.StatusInternalServerError, err.Error(), c)
 		return
 	}
 
 	// combine result
-	combineResult := ResGetAllAdminWithPaging{
-		Pagination: Pagination{
-			Page:       paging.Page,
-			PerPage:    paging.PerPage,
-			Total:      paging.Total,
-			TotalPages: paging.TotalPages,
-		},
-		Admins: ResponseListActor(result),
-	}
+	combineResult := ToResGetAllAdminWithPaging(result)
 
 	res := WebResponse{
 		Message: "Success",

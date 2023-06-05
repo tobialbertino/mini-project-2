@@ -14,8 +14,8 @@ func NewAccountRepository() AccountRepository {
 }
 
 // Pagination implements CustomerRepository.
-func (repo *AccountRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagiantion) (entity.Pagiantion, error) {
-	var res entity.Pagiantion
+func (repo *AccountRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagination) (entity.Pagination, error) {
+	var res entity.Pagination
 
 	SQL := `
 	SELECT count(id) 
@@ -26,14 +26,14 @@ func (repo *AccountRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagiantion) 
 
 	rows, err := tx.Query(SQL, varArgs...)
 	if err != nil {
-		return entity.Pagiantion{}, err
+		return entity.Pagination{}, err
 	}
 	defer rows.Close()
 
 	if rows.Next() {
 		err := rows.Scan(&res.Total)
 		if err != nil {
-			return entity.Pagiantion{}, err
+			return entity.Pagination{}, err
 		}
 	}
 
@@ -41,7 +41,7 @@ func (repo *AccountRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagiantion) 
 }
 
 // GetAllAdmin implements AccountRepository.
-func (repo *AccountRepositoryImpl) GetAllAdmin(tx *sql.Tx, actor entity.Actor, etPage entity.Pagiantion) ([]entity.Actor, error) {
+func (repo *AccountRepositoryImpl) GetAllAdmin(tx *sql.Tx, actor entity.Actor, etPage entity.Pagination) ([]entity.Actor, error) {
 	result := make([]entity.Actor, 0)
 
 	SQL := `

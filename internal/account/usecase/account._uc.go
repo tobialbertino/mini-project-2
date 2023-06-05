@@ -10,7 +10,7 @@ type AccountUseCase interface {
 	// actor
 	AddActor(req domain.Actor) (int64, error)
 	// GetAllAdmin With Pagination
-	GetAllAdmin(req domain.Actor, pagi domain.Pagiantion) ([]domain.Actor, domain.Pagiantion, error)
+	GetAllAdmin(req domain.Actor, pagi domain.Pagination) (domain.ListActorWithPaging, error)
 
 	// super_admin
 	GetAllApprovalAdmin() ([]domain.AdminReg, error)

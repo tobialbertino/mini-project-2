@@ -14,8 +14,8 @@ func NewCustomerRepository() CustomerRepository {
 }
 
 // Pagination implements CustomerRepository.
-func (repo *CustomerRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagiantion) (entity.Pagiantion, error) {
-	var res entity.Pagiantion
+func (repo *CustomerRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagination) (entity.Pagination, error) {
+	var res entity.Pagination
 
 	SQL := `
 	SELECT count(id) FROM
@@ -24,14 +24,14 @@ func (repo *CustomerRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagiantion)
 
 	rows, err := tx.Query(SQL, varArgs...)
 	if err != nil {
-		return entity.Pagiantion{}, err
+		return entity.Pagination{}, err
 	}
 	defer rows.Close()
 
 	if rows.Next() {
 		err := rows.Scan(&res.Total)
 		if err != nil {
-			return entity.Pagiantion{}, err
+			return entity.Pagination{}, err
 		}
 	}
 
@@ -88,7 +88,7 @@ func (repo *CustomerRepositoryImpl) DeleteCustomerByID(tx *sql.Tx, et entity.Cus
 }
 
 // GetAllCustomer implements CustomerRepository.
-func (repo *CustomerRepositoryImpl) GetAllCustomer(tx *sql.Tx, et entity.Customer, etPaging entity.Pagiantion) ([]entity.Customer, error) {
+func (repo *CustomerRepositoryImpl) GetAllCustomer(tx *sql.Tx, et entity.Customer, etPaging entity.Pagination) ([]entity.Customer, error) {
 	result := make([]entity.Customer, 0)
 
 	SQL := `
