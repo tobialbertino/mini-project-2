@@ -14,7 +14,7 @@ func NewCustomerRepository() CustomerRepository {
 }
 
 // Pagination implements CustomerRepository.
-func (repo *CustomerRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagination) (entity.Pagination, error) {
+func (repo *CustomerRepositoryImpl) Pagination(tx *sql.DB, et entity.Pagination) (entity.Pagination, error) {
 	var res entity.Pagination
 
 	SQL := `
@@ -88,7 +88,7 @@ func (repo *CustomerRepositoryImpl) DeleteCustomerByID(tx *sql.Tx, et entity.Cus
 }
 
 // GetAllCustomer implements CustomerRepository.
-func (repo *CustomerRepositoryImpl) GetAllCustomer(tx *sql.Tx, et entity.Customer, etPaging entity.Pagination) ([]entity.Customer, error) {
+func (repo *CustomerRepositoryImpl) GetAllCustomer(tx *sql.DB, et entity.Customer, etPaging entity.Pagination) ([]entity.Customer, error) {
 	result := make([]entity.Customer, 0)
 
 	SQL := `

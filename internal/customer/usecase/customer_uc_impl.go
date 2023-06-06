@@ -64,19 +64,21 @@ func (uc *CustomerUseCaseImpl) DeleteCustomerByID(dt domain.Customer) (int64, er
 
 // GetAllCustomer implements CustomertUseCase.
 func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pagination) (domain.ListActorWithPaging, error) {
+	var err error
 	var wg sync.WaitGroup
 	var res []entity.Customer
 	var resPaging entity.Pagination
-	chRes := make(chan []entity.Customer, 100)
-	chResPaging := make(chan entity.Pagination, 100)
-	chErrRes := make(chan error, 100)
-	chErrPaging := make(chan error, 100)
+	chRes := make(chan []entity.Customer, 1)
+	chResPaging := make(chan entity.Pagination, 1)
+	chErrRes := make(chan error, 1)
+	chErrPaging := make(chan error, 1)
 
-	tx, err := uc.DB.Begin()
-	if err != nil {
-		return domain.ListActorWithPaging{}, err
-	}
-	defer helper.CommitOrRollback(err, tx)
+	// !Error tx with go routine, temporary solution using db queries
+	// tx, err := uc.DB.Begin()
+	// if err != nil {
+	// 	return domain.ListActorWithPaging{}, err
+	// }
+	// defer helper.CommitOrRollback(err, tx)
 
 	// define pagination
 	etPaging := entity.Pagination{
@@ -97,7 +99,7 @@ func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pa
 	go func() {
 		defer wg.Done()
 		// get all customer with pagination
-		res, err = uc.CustomerRepository.GetAllCustomer(tx, et, etPaging)
+		res, err = uc.CustomerRepository.GetAllCustomer(uc.DB, et, etPaging)
 		if err != nil {
 			chErrRes <- err
 		}
@@ -108,7 +110,7 @@ func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pa
 	go func() {
 		defer wg.Done()
 		// Get Total Data
-		resPaging, err = uc.CustomerRepository.Pagination(tx, etPaging)
+		resPaging, err = uc.CustomerRepository.Pagination(uc.DB, etPaging)
 		if err != nil {
 			chErrPaging <- err
 		}

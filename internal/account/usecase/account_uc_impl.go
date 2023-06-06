@@ -27,13 +27,19 @@ func NewAccountUseCase(AccountRepository repository.AccountRepository, DB *sql.D
 
 // GetAllAdmin implements AccountUseCase.
 func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Pagination) (domain.ListActorWithPaging, error) {
+	var (
+		err       error
+		wg        sync.WaitGroup
+		resPaging entity.Pagination
+		result    []entity.Actor
+	)
+
 	chListAdmin := make(chan []entity.Actor, 1)
 	chPaging := make(chan entity.Pagination, 1)
 	errListAdmin := make(chan error, 1)
 	errPagination := make(chan error, 1)
-	var resPaging entity.Pagination
-	var result []entity.Actor
 
+	// ?: Error tx with go routine, temporary solution using db queries, maybe tx doesn't support query rows on goroutines
 	tx, err := uc.DB.Begin()
 	if err != nil {
 		return domain.ListActorWithPaging{}, err
@@ -52,7 +58,9 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Paginati
 		Username: req.Username,
 	}
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		result, err := uc.AccountRepository.GetAllAdmin(tx, et, etPaging)
 		if err != nil {
 			errListAdmin <- err
@@ -60,7 +68,9 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Paginati
 		chListAdmin <- result
 	}()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		// Get Total Data
 		resPaging, err := uc.AccountRepository.Pagination(tx, etPaging)
 		if err != nil {
@@ -68,6 +78,7 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Paginati
 		}
 		chPaging <- resPaging
 	}()
+	wg.Wait()
 
 	for i := 0; i < 2; i++ {
 		select {
@@ -118,8 +129,10 @@ func (uc *AccountUseCaseImpl) DeleteAdminByID(req domain.Actor) (int64, error) {
 
 // UpdateAdminStatusByID implements AccountUseCase.
 func (uc *AccountUseCaseImpl) UpdateAdminStatusByID(reqReg domain.AdminReg, reqActor domain.Actor) (int64, error) {
-	var wg sync.WaitGroup
-	var result int64
+	var (
+		wg     sync.WaitGroup
+		result int64
+	)
 	chErr1 := make(chan error, 1)
 	chErr2 := make(chan error, 1)
 	chInt := make(chan int64, 1)
