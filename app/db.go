@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"miniProject2/pkg/config"
 	"os"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -27,10 +26,11 @@ func NewDB(cfg *config.Config) *sql.DB {
 		fmt.Println("success to connect database MySQL")
 	}
 
-	db.SetMaxIdleConns(5)
-	db.SetMaxOpenConns(20)
-	db.SetConnMaxLifetime(60 * time.Minute)
-	db.SetConnMaxIdleTime(10 * time.Minute)
+	db.SetMaxIdleConns(-1)
+	db.SetMaxOpenConns(-1)
+	db.SetConnMaxLifetime(-1)
+	db.SetConnMaxLifetime(-1)
+	db.SetConnMaxIdleTime(-1)
 
 	return db
 }

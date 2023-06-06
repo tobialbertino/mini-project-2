@@ -21,12 +21,11 @@ func NewAccountHandler(AccountUC usecase.AccountUseCase) *AccountHandler {
 	}
 }
 
-// TODO: Implement Authentications through middleware
 func (h *AccountHandler) Route(app *gin.Engine) {
 	app.POST("/login", h.Login) // Generate token JWT
 
 	g := app.Group("/account", middleware.Auth()) // using middleware
-	g.GET("", h.GetAllAdmin)                      // TODO: implement goroutine
+	g.GET("", h.GetAllAdmin)                      // TODO: implement goroutine, sometimes errors bad connection, and a busy buffer
 	g.POST("", h.AddActor)
 
 	// only super_admin

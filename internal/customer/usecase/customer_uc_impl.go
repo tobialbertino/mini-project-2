@@ -6,6 +6,7 @@ import (
 	"miniProject2/internal/customer/model/entity"
 	"miniProject2/internal/customer/repository"
 	"miniProject2/pkg/helper"
+	"sync"
 )
 
 type CustomerUseCaseImpl struct {
@@ -63,6 +64,14 @@ func (uc *CustomerUseCaseImpl) DeleteCustomerByID(dt domain.Customer) (int64, er
 
 // GetAllCustomer implements CustomertUseCase.
 func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pagination) (domain.ListActorWithPaging, error) {
+	var wg sync.WaitGroup
+	var res []entity.Customer
+	var resPaging entity.Pagination
+	chRes := make(chan []entity.Customer, 100)
+	chResPaging := make(chan entity.Pagination, 100)
+	chErrRes := make(chan error, 100)
+	chErrPaging := make(chan error, 100)
+
 	tx, err := uc.DB.Begin()
 	if err != nil {
 		return domain.ListActorWithPaging{}, err
@@ -83,16 +92,41 @@ func (uc *CustomerUseCaseImpl) GetAllCustomer(dt domain.Customer, pagi domain.Pa
 		LastName:  dt.LastName,
 		Email:     dt.Email,
 	}
-	// get all customer with pagination
-	res, err := uc.CustomerRepository.GetAllCustomer(tx, et, etPaging)
-	if err != nil {
-		return domain.ListActorWithPaging{}, err
-	}
 
-	// Get Total Data
-	resPaging, err := uc.CustomerRepository.Pagination(tx, etPaging)
-	if err != nil {
-		return domain.ListActorWithPaging{}, err
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		// get all customer with pagination
+		res, err = uc.CustomerRepository.GetAllCustomer(tx, et, etPaging)
+		if err != nil {
+			chErrRes <- err
+		}
+		chRes <- res
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		// Get Total Data
+		resPaging, err = uc.CustomerRepository.Pagination(tx, etPaging)
+		if err != nil {
+			chErrPaging <- err
+		}
+		chResPaging <- resPaging
+	}()
+	wg.Wait()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case res = <-chRes:
+			continue
+		case resPaging = <-chResPaging:
+			continue
+		case err = <-chErrRes:
+			return domain.ListActorWithPaging{}, err
+		case err = <-chErrPaging:
+			return domain.ListActorWithPaging{}, err
+		}
 	}
 
 	totalPages := resPaging.Total / 6

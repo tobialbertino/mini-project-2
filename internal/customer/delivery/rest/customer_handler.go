@@ -24,7 +24,7 @@ func NewCustomerHandler(CustomerUC usecase.CustomertUseCase) *CustomerHandler {
 func (h *CustomerHandler) Route(app *gin.Engine) {
 	g := app.Group("/customer", middleware.Auth())
 
-	g.GET("", h.GetAllCustomer) // TODO: implement goroutine
+	g.GET("", h.GetAllCustomer) // TODO: implement goroutine, sometimes errors bad connection, and a busy buffer
 	g.GET("/:id", h.GetCustomerByID)
 	g.POST("", h.CreateCustomer)
 	g.PUT("/:id", h.UpdateCustomerByID)
@@ -33,6 +33,7 @@ func (h *CustomerHandler) Route(app *gin.Engine) {
 
 func (h *CustomerHandler) GetAllCustomer(c *gin.Context) {
 	var req ReqGetAllCustomer
+
 	page := c.Query("page")
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {

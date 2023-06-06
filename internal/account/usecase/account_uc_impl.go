@@ -27,6 +27,13 @@ func NewAccountUseCase(AccountRepository repository.AccountRepository, DB *sql.D
 
 // GetAllAdmin implements AccountUseCase.
 func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Pagination) (domain.ListActorWithPaging, error) {
+	chListAdmin := make(chan []entity.Actor, 1)
+	chPaging := make(chan entity.Pagination, 1)
+	errListAdmin := make(chan error, 1)
+	errPagination := make(chan error, 1)
+	var resPaging entity.Pagination
+	var result []entity.Actor
+
 	tx, err := uc.DB.Begin()
 	if err != nil {
 		return domain.ListActorWithPaging{}, err
@@ -45,15 +52,34 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Paginati
 		Username: req.Username,
 	}
 
-	result, err := uc.AccountRepository.GetAllAdmin(tx, et, etPaging)
-	if err != nil {
-		return domain.ListActorWithPaging{}, err
-	}
+	go func() {
+		result, err := uc.AccountRepository.GetAllAdmin(tx, et, etPaging)
+		if err != nil {
+			errListAdmin <- err
+		}
+		chListAdmin <- result
+	}()
 
-	// Get Total Data
-	resPaging, err := uc.AccountRepository.Pagination(tx, etPaging)
-	if err != nil {
-		return domain.ListActorWithPaging{}, err
+	go func() {
+		// Get Total Data
+		resPaging, err := uc.AccountRepository.Pagination(tx, etPaging)
+		if err != nil {
+			errPagination <- err
+		}
+		chPaging <- resPaging
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case result = <-chListAdmin:
+			continue
+		case resPaging = <-chPaging:
+			continue
+		case err = <-errListAdmin:
+			return domain.ListActorWithPaging{}, err
+		case err = <-errPagination:
+			return domain.ListActorWithPaging{}, err
+		}
 	}
 
 	totalPages := resPaging.Total / 6
