@@ -12,8 +12,8 @@ type AccountRepository interface {
 
 	// actor
 	AddActor(tx *sql.Tx, actor entity.Actor) (int64, error)
-	GetAllAdmin(tx *sql.Tx, actor entity.Actor, et entity.Pagination) ([]entity.Actor, error)
-	Pagination(tx *sql.Tx, et entity.Pagination) (entity.Pagination, error) // only Get Total Data
+	GetAllAdmin(tx *sql.DB, actor entity.Actor, et entity.Pagination) ([]entity.Actor, error)
+	Pagination(tx *sql.DB, et entity.Pagination) (entity.Pagination, error) // only Get Total Data
 
 	// admin reg
 	RegisterAdmin(tx *sql.Tx, adminReg entity.AdminReg) (int64, error)

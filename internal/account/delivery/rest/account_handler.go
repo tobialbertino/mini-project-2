@@ -25,8 +25,10 @@ func (h *AccountHandler) Route(app *gin.Engine) {
 	app.POST("/login", h.Login) // Generate token JWT
 
 	g := app.Group("/account", middleware.Auth()) // using middleware
-	g.GET("", h.GetAllAdmin)                      // TODO: implement goroutine, sometimes errors bad connection, and a busy buffer
 	g.POST("", h.AddActor)
+	// !mplement goroutine, sometimes errors bad connection, and a busy buffer,
+	// !Error tx with go routine, solution using simple db queries
+	g.GET("", h.GetAllAdmin)
 
 	// only super_admin
 	g.GET("/admin-reg", middleware.AuthSuperAdmin(), h.GetAllAppovalAdmin)

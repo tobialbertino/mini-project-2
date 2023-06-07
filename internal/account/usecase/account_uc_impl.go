@@ -39,12 +39,12 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Paginati
 	errListAdmin := make(chan error, 1)
 	errPagination := make(chan error, 1)
 
-	// ?: Error tx with go routine, temporary solution using db queries, maybe tx doesn't support query rows on goroutines
-	tx, err := uc.DB.Begin()
-	if err != nil {
-		return domain.ListActorWithPaging{}, err
-	}
-	defer helper.CommitOrRollback(err, tx)
+	// ?: Error tx with go routine, temporary solution using db queries, maybe tx MySQL doesn't support query select rows on goroutines
+	// tx, err := uc.DB.Begin()
+	// if err != nil {
+	// 	return domain.ListActorWithPaging{}, err
+	// }
+	// defer helper.CommitOrRollback(err, tx)
 
 	// define pagination
 	etPaging := entity.Pagination{
@@ -61,7 +61,7 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Paginati
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		result, err := uc.AccountRepository.GetAllAdmin(tx, et, etPaging)
+		result, err := uc.AccountRepository.GetAllAdmin(uc.DB, et, etPaging)
 		if err != nil {
 			errListAdmin <- err
 		}
@@ -72,7 +72,7 @@ func (uc *AccountUseCaseImpl) GetAllAdmin(req domain.Actor, pagi domain.Paginati
 	go func() {
 		defer wg.Done()
 		// Get Total Data
-		resPaging, err := uc.AccountRepository.Pagination(tx, etPaging)
+		resPaging, err := uc.AccountRepository.Pagination(uc.DB, etPaging)
 		if err != nil {
 			errPagination <- err
 		}

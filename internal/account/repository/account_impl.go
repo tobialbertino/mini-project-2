@@ -14,7 +14,7 @@ func NewAccountRepository() AccountRepository {
 }
 
 // Pagination implements CustomerRepository.
-func (repo *AccountRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagination) (entity.Pagination, error) {
+func (repo *AccountRepositoryImpl) Pagination(tx *sql.DB, et entity.Pagination) (entity.Pagination, error) {
 	var res entity.Pagination
 
 	SQL := `
@@ -41,7 +41,7 @@ func (repo *AccountRepositoryImpl) Pagination(tx *sql.Tx, et entity.Pagination) 
 }
 
 // GetAllAdmin implements AccountRepository.
-func (repo *AccountRepositoryImpl) GetAllAdmin(tx *sql.Tx, actor entity.Actor, etPage entity.Pagination) ([]entity.Actor, error) {
+func (repo *AccountRepositoryImpl) GetAllAdmin(tx *sql.DB, actor entity.Actor, etPage entity.Pagination) ([]entity.Actor, error) {
 	result := make([]entity.Actor, 0)
 
 	SQL := `
