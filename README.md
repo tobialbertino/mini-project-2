@@ -62,3 +62,67 @@ Error message show below,
 - Implement Unit Test start from layer UseCase
 
 Enjoy the code
+
+## CI/CD -> Container
+
+# How to run
+
+## Build Docker Image
+```shell
+docker build -t mini-project .
+```
+
+## Run Docker Image
+```shell
+docker run contoh
+```
+
+# Docker Compose
+
+Menjalankan semua service:
+
+```shell
+docker-compose up -d
+```
+
+Shutdown service:
+
+```shell
+docker-compose down
+```
+
+
+## Migrasi Data
+### Export Database Menggunakan Mysqldump
+
+1. Export database dengan `mysqldump`
+
+```shell
+mysqldump -u root -p exercise_sql > ./script/dump.sql
+```
+
+2. Copy file sql ke dalam container, misalnya di path `/home/namadatabase.sql`
+
+```shell
+docker compose cp ./script/dump.sql db:/home/dump.sql
+docker compose cp ./script/script.sql db:/home/script.sql
+```
+
+3. Masuk ke shell DB:
+
+```shell
+docker compose exec -it db sh
+```
+
+4. Masuk ke sesi mysql:
+
+```shell
+mysql -u root -p
+```
+
+5. Jalankan perintah:
+
+```shell
+use exercise_sql;
+source /home/namadatabase.sql;
+```
