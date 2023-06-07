@@ -48,13 +48,17 @@ Using MySQL Database
     - GET /account
     - GET /customer
 
-Some Tx implementations could error. Error tx with go routine, temporary solution using db queries and normal
-Error message show below ![error message](/script/Error-tx-select-rows.png)
+Some Tx implementations could error. Error tx with go routine, temporary solution using *sql.DB object queries rather than Tx, and normal again.
+Error message show below,
+
+ ![error message](/script/Error-tx-select-rows.png)
 
 ## Things that can be developed
 
 - separation of module/internal account with authentications (login)
 - In tokenizing JWT, implement Refresh Token
+- add more error handler
 - Better Error_Handler Like the default/custom error handler from fiber/echo framework
+- Implement Unit Test start from layer UseCase
 
 Enjoy the code

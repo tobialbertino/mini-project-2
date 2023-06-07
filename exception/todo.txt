@@ -1,1 +1,4 @@
 Custom Error_Handler... (general)
+In Go Gin, don't forget to call c.Abort to stop the chain preses of Context
+
+Next develop: create general custom error_handler like Go Fiber/echo
