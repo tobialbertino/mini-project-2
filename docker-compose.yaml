@@ -1,29 +1,37 @@
-version: '3'
+version: '3.8'
+
+# create volume: mini-project-db  
+volumes:
+  mini-project-db:
+    name: mini-project-db
 
 services:
   # service 1
-  app:
-    container_name: app-mini-project
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 8080:8080
-    depends_on:
-      - db
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=db
-
-  # service 2
-  db:
-    container_name: db-mini-project
+  mini-project-db:
+    container_name: mini-project-db
     image: mysql:8
+    # Restart policy, will be restarted when the app fails to run.
+    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=mysql
       - MYSQL_DATABASE=exercise_sql
     volumes:
-      - contoh-db:/var/lib/mysql
-volumes:
-  contoh-db:
+      - mini-project-db:/var/lib/mysql
+
+  # service 2
+  mini-project-app:
+    container_name: mini-project-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Restart policy, will be restarted when the app fails to run.
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - mini-project-db
+    env_file:
+      - .env
+    # overwrite .env 
+    environment:
+      - DB_HOST=mini-project-db

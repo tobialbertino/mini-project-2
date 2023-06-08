@@ -79,9 +79,10 @@ docker run contoh
 
 ## Docker Compose
 
-Menjalankan semua service:
+Menjalankan semua service di background:
 
 ```shell
+docker-compose up --detach
 docker-compose up -d
 ```
 
@@ -104,15 +105,15 @@ mysqldump -u root -p exercise_sql > ./script/dump.sql
 2. Copy file sql ke dalam container, misalnya di path `/home/namadatabase.sql`
 
 ```shell
-docker compose cp ./script/dump.sql db:/home/dump.sql
+docker compose cp ./script/dump.sql mini-project-db:/home/dump.sql
 # or with script.sql
-docker compose cp ./script/script.sql db:/home/script.sql
+docker compose cp ./script/script.sql mini-project-db:/home/script.sql
 ```
 
 3. Masuk ke shell DB:
 
 ```shell
-docker compose exec -it db sh
+docker compose exec -i -t mini-project-db sh
 ```
 
 4. Masuk ke sesi mysql:
