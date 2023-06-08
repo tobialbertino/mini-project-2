@@ -63,7 +63,7 @@ Error message show below,
 
 Enjoy the code
 
-## CI/CD -> Container
+# CI/CD ->  docker Container
 
 # How to run
 
@@ -77,7 +77,7 @@ docker build -t mini-project .
 docker run contoh
 ```
 
-# Docker Compose
+## Docker Compose
 
 Menjalankan semua service:
 
@@ -105,6 +105,7 @@ mysqldump -u root -p exercise_sql > ./script/dump.sql
 
 ```shell
 docker compose cp ./script/dump.sql db:/home/dump.sql
+# or with script.sql
 docker compose cp ./script/script.sql db:/home/script.sql
 ```
 
@@ -124,5 +125,15 @@ mysql -u root -p
 
 ```shell
 use exercise_sql;
-source /home/namadatabase.sql;
+source /home/dump.sql;
+```
+
+# mockery
+
+```shell
+go install github.com/vektra/mockery/v2@v2.20.0
+```
+generate mocks
+```shell
+mockery --all --keeptree --case underscore --with-expecter
 ```
