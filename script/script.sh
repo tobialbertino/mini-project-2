@@ -18,6 +18,6 @@ docker image tag mini-project:v1 tobialbertino/mini-project:v1
 docker login -u tobialbertino -p $1
 
 # Push to DockerHub 
-docker push tobialbertino/item-app:v1
+docker push tobialbertino/mini-project:v1
 
 
