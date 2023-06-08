@@ -2,11 +2,17 @@ package usecase
 
 import (
 	"database/sql"
+	mocks "miniProject2/mocks/modules/customer/repository"
 	"miniProject2/modules/customer/model/domain"
+	"miniProject2/modules/customer/model/entity"
 	"miniProject2/modules/customer/repository"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 )
+
+// var mockRepo = mocks.CustomerRepository{}
 
 func TestNewCustomerUseCase(t *testing.T) {
 	type args struct {
@@ -29,7 +35,11 @@ func TestNewCustomerUseCase(t *testing.T) {
 	}
 }
 
+// TODO: Mock sql.DB, because start transaction
 func TestCustomerUseCaseImpl_CreateCustomer(t *testing.T) {
+	// var DB sql.DB // TODO mock DB...
+	// var mockRepo = mocks.NewCustomerRepository(t)
+
 	type args struct {
 		dt domain.Customer
 	}
@@ -84,6 +94,14 @@ func TestCustomerUseCaseImpl_DeleteCustomerByID(t *testing.T) {
 }
 
 func TestCustomerUseCaseImpl_GetAllCustomer(t *testing.T) {
+	var mockRepo = mocks.NewCustomerRepository(t)
+	mockRepo.EXPECT().GetAllCustomer(mock.Anything, mock.Anything, mock.Anything).
+		Return([]entity.Customer{}, nil).
+		Once()
+	mockRepo.EXPECT().Pagination(mock.Anything, mock.Anything).
+		Return(entity.Pagination{}, nil).
+		Once()
+
 	type args struct {
 		dt   domain.Customer
 		pagi domain.Pagination
@@ -96,6 +114,27 @@ func TestCustomerUseCaseImpl_GetAllCustomer(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "success",
+			uc: &CustomerUseCaseImpl{
+				CustomerRepository: mockRepo,
+				DB:                 nil,
+			},
+			args: args{
+				dt: domain.Customer{},
+				pagi: domain.Pagination{
+					Page: 1,
+				},
+			},
+			want: domain.ListActorWithPaging{
+				Pagination: domain.Pagination{
+					Page:    1,
+					PerPage: 6,
+				},
+				Customers: []domain.Customer{},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
