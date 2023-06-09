@@ -9,10 +9,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/mock"
 )
-
-// var mockRepo = mocks.CustomerRepository{}
 
 func TestNewCustomerUseCase(t *testing.T) {
 	type args struct {
@@ -35,10 +34,21 @@ func TestNewCustomerUseCase(t *testing.T) {
 	}
 }
 
-// TODO: Mock sql.DB, because start transaction
+// Mock sql.DB, because start transaction
 func TestCustomerUseCaseImpl_CreateCustomer(t *testing.T) {
-	// var DB sql.DB // TODO mock DB...
-	// var mockRepo = mocks.NewCustomerRepository(t)
+	// mock DB...
+	db, sql, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	sql.ExpectBegin()
+	sql.ExpectCommit()
+	// mock repo
+	var mockRepo = mocks.NewCustomerRepository(t)
+	mockRepo.EXPECT().
+		CreateCustomer(mock.Anything, mock.Anything).Return(1, nil).
+		Once()
 
 	type args struct {
 		dt domain.Customer
@@ -51,6 +61,23 @@ func TestCustomerUseCaseImpl_CreateCustomer(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "success add customer",
+			uc: &CustomerUseCaseImpl{
+				CustomerRepository: mockRepo,
+				DB:                 db,
+			},
+			args: args{
+				dt: domain.Customer{
+					FirstName: "test",
+					LastName:  "test",
+					Email:     "test",
+					Avatar:    "test",
+				},
+			},
+			want:    1,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,6 +94,21 @@ func TestCustomerUseCaseImpl_CreateCustomer(t *testing.T) {
 }
 
 func TestCustomerUseCaseImpl_DeleteCustomerByID(t *testing.T) {
+	// mock DB...
+	db, sql, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	sql.ExpectBegin()
+	sql.ExpectCommit()
+	// mock repo
+	var mockRepo = mocks.NewCustomerRepository(t)
+	mockRepo.EXPECT().
+		DeleteCustomerByID(mock.Anything, mock.AnythingOfType("entity.Customer")).
+		Return(1, nil).
+		Once()
+
 	type args struct {
 		dt domain.Customer
 	}
@@ -78,6 +120,20 @@ func TestCustomerUseCaseImpl_DeleteCustomerByID(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "success Delete",
+			uc: &CustomerUseCaseImpl{
+				CustomerRepository: mockRepo,
+				DB:                 db,
+			},
+			args: args{
+				dt: domain.Customer{
+					ID: 10,
+				},
+			},
+			want:    1,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -151,6 +207,20 @@ func TestCustomerUseCaseImpl_GetAllCustomer(t *testing.T) {
 }
 
 func TestCustomerUseCaseImpl_GetCustomerByID(t *testing.T) {
+	// mock DB...
+	db, sql, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	sql.ExpectBegin()
+	sql.ExpectCommit()
+	// mock repo
+	var mockRepo = mocks.NewCustomerRepository(t)
+	mockRepo.EXPECT().
+		GetCustomerByID(mock.Anything, mock.AnythingOfType("entity.Customer")).
+		Return(entity.Customer{}, nil)
+
 	type args struct {
 		dt domain.Customer
 	}
@@ -162,6 +232,18 @@ func TestCustomerUseCaseImpl_GetCustomerByID(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "success GetCustomerByID",
+			uc: &CustomerUseCaseImpl{
+				CustomerRepository: mockRepo,
+				DB:                 db,
+			},
+			args: args{
+				dt: domain.Customer{},
+			},
+			want:    domain.Customer{},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -178,6 +260,21 @@ func TestCustomerUseCaseImpl_GetCustomerByID(t *testing.T) {
 }
 
 func TestCustomerUseCaseImpl_UpdateCustomerByID(t *testing.T) {
+	// mock DB...
+	db, sql, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+	sql.ExpectBegin()
+	sql.ExpectCommit()
+	// mock repo
+	var mockRepo = mocks.NewCustomerRepository(t)
+	mockRepo.EXPECT().
+		UpdateCustomerByID(mock.Anything, mock.AnythingOfType("entity.Customer")).
+		Return(1, nil).
+		Once()
+
 	type args struct {
 		dt domain.Customer
 	}
@@ -189,6 +286,18 @@ func TestCustomerUseCaseImpl_UpdateCustomerByID(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Success",
+			uc: &CustomerUseCaseImpl{
+				CustomerRepository: mockRepo,
+				DB:                 db,
+			},
+			args: args{
+				dt: domain.Customer{},
+			},
+			want:    1,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
