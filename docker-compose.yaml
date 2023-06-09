@@ -21,9 +21,10 @@ services:
   # service 2
   mini-project-app:
     container_name: mini-project-app
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: tobialbertino/mini-project:v1
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     # Restart policy, will be restarted when the app fails to run.
     restart: always
     ports:

@@ -1,8 +1,9 @@
 # using mockery 
 go install github.com/vektra/mockery/v2@v2.20.0
 # then 
-mockery --all --keeptree --case underscore --with-expecter
+mockery --all --keeptree --case=underscore --with-expecter=true
 
+# Docker Container 
 # Create docker image from Dockerfile 
 docker build -t mini-project:v1 .
 
@@ -17,6 +18,6 @@ docker image tag mini-project:v1 tobialbertino/mini-project:v1
 docker login -u tobialbertino -p $1
 
 # Push to DockerHub 
-docker push tobialbertino/item-app:v1
+docker push tobialbertino/mini-project:v1
 
 

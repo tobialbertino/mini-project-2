@@ -2,13 +2,13 @@ package app
 
 import (
 	"database/sql"
-	accHandler "miniProject2/internal/account/delivery/rest"
-	accRepo "miniProject2/internal/account/repository"
-	accUC "miniProject2/internal/account/usecase"
+	accHandler "miniProject2/modules/account/delivery/rest"
+	accRepo "miniProject2/modules/account/repository"
+	accUC "miniProject2/modules/account/usecase"
 
-	customerHandler "miniProject2/internal/customer/delivery/rest"
-	customerRepo "miniProject2/internal/customer/repository"
-	customerUC "miniProject2/internal/customer/usecase"
+	customerHandler "miniProject2/modules/customer/delivery/rest"
+	customerRepo "miniProject2/modules/customer/repository"
+	customerUC "miniProject2/modules/customer/usecase"
 
 	"github.com/gin-gonic/gin"
 )
