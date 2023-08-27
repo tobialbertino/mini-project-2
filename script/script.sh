@@ -3,6 +3,9 @@ go install github.com/vektra/mockery/v2@v2.20.0
 # then 
 mockery --all --keeptree --case=underscore --with-expecter=true
 
+# Mock with mockgen
+mockgen --source=repository.go --build_flags=--mod=mod --destination=mock/interface.go --package=mock
+
 # Docker Container 
 # Create docker image from Dockerfile 
 docker build -t mini-project:v1 .
